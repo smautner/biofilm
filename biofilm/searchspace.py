@@ -13,6 +13,26 @@ from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.ensemble import ExtraTreesClassifier, GradientBoostingClassifier
 from scipy.stats import randint as rint
 from imblearn.over_sampling import RandomOverSampler
+from lmz import *
+
+classifiers = {
+        'KNeighbors' : (KNeighborsClassifier(),KNeighborsClassifierparam),
+        'SVC' : (SVC(),SVCparam),
+        'DecisionTree' : (DecisionTreeClassifier(),DecisionTreeClassifierparam),
+        'MLP' : (MLPClassifier(),MLPClassifierparam),
+        'AdaBoost' : (AdaBoostClassifier(),AdaBoostClassifierparam),
+        'GaussianNB' : (GaussianNB(),GaussianNBparam),
+        'QuadraticDiscriminantAnalysis' : (QuadraticDiscriminantAnalysis(),QuadraticDiscriminantAnalysisparam),
+        'RandomForest' : (RandomForestClassifier(),RandomForestClassifierparam),
+        'ExtraTrees' : (ExtraTreesClassifier(),ExtraTreesClassifierparam),
+        'GradientBoosting' : (GradientBoostingClassifier(),GradientBoostingClassifierparam),
+        }
+
+
+
+
+
+
 
 class OS_MLPClassifier(MLPClassifier):
     def fit(self, X, y):
@@ -31,11 +51,6 @@ class OS_GradientBoostingClassifier(GradientBoostingClassifier):
         os = RandomOverSampler(random_state=42)
         X_re, y_re = os.fit_sample(X, y)
         GradientBoostingClassifier.fit(self, X_re, y_re)
-
-
-
-
-
 
 
 
@@ -172,24 +187,13 @@ GradientBoostingClassifierparam = {'ccp_alpha': [0.0],
  'verbose': [0],
  'warm_start': [False]}
 
-classifiers = {
-'KNeighborsClassifier' : (KNeighborsClassifier(),KNeighborsClassifierparam),
-'SVC' : (SVC(),SVCparam),
-'DecisionTreeClassifier' : (DecisionTreeClassifier(),DecisionTreeClassifierparam),
-'MLPClassifier' : (MLPClassifier(),MLPClassifierparam),
-'AdaBoostClassifier' : (AdaBoostClassifier(),AdaBoostClassifierparam),
-'GaussianNB' : (GaussianNB(),GaussianNBparam),
-'QuadraticDiscriminantAnalysis' : (QuadraticDiscriminantAnalysis(),QuadraticDiscriminantAnalysisparam),
-'RandomForestClassifier' : (RandomForestClassifier(),RandomForestClassifierparam),
-'ExtraTreesClassifier' : (ExtraTreesClassifier(),ExtraTreesClassifierparam),
-'GradientBoostingClassifier' : (GradientBoostingClassifier(),GradientBoostingClassifierparam),
-}
 
 
 
 
 
 if __name__=="__main__":
+    # THIS GENERATES THE CLASSIFIER LIST 
     classifiers = [
     KNeighborsClassifier(),
     SVC(), 
@@ -207,11 +211,10 @@ if __name__=="__main__":
     for  cl, pa in zip(map(str,classifiers), param_list):
         print (f"{cl[:-2]}param = ", end ='')
         pprint.pprint(pa)
-
     
     print("classifiers = {")
     for cl in map(str,classifiers):
-        print (f"'{cl[:-2]}' : ({cl},{cl[:-2]}param),")
+        print (f"'{cl.replace('Classifier','')[:-2]}' : ({cl},{cl[:-2]}param),")
     print ("}")
 
 
