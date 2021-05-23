@@ -14,20 +14,7 @@ from sklearn.ensemble import ExtraTreesClassifier, GradientBoostingClassifier
 from scipy.stats import randint as rint
 from imblearn.over_sampling import RandomOverSampler
 from lmz import *
-
-classifiers = {
-        'KNeighbors' : (KNeighborsClassifier(),KNeighborsClassifierparam),
-        'SVC' : (SVC(),SVCparam),
-        'DecisionTree' : (DecisionTreeClassifier(),DecisionTreeClassifierparam),
-        'MLP' : (MLPClassifier(),MLPClassifierparam),
-        'AdaBoost' : (AdaBoostClassifier(),AdaBoostClassifierparam),
-        'GaussianNB' : (GaussianNB(),GaussianNBparam),
-        'QuadraticDiscriminantAnalysis' : (QuadraticDiscriminantAnalysis(),QuadraticDiscriminantAnalysisparam),
-        'RandomForest' : (RandomForestClassifier(),RandomForestClassifierparam),
-        'ExtraTrees' : (ExtraTreesClassifier(),ExtraTreesClassifierparam),
-        'GradientBoosting' : (GradientBoostingClassifier(),GradientBoostingClassifierparam),
-        }
-
+import numpy as np
 
 
 
@@ -147,16 +134,16 @@ ExtraTreesClassifierparam = {'bootstrap': [False, True],
  'ccp_alpha': [0.0],
  'class_weight': [None, 'balanced'],
  'criterion': ['gini','entropy'],
- 'max_depth': [None],
+ 'max_depth': Range(5,30),
  'max_features': ['auto'],
  'max_leaf_nodes': [None],
  'max_samples': [None],
- 'min_impurity_decrease': [0.0],
+ 'min_impurity_decrease': np.arange(0,0.1,0.001),
  'min_impurity_split': [None],
- 'min_samples_leaf': [1],
- 'min_samples_split': [2],
+ 'min_samples_leaf': Range(1,10),
+ 'min_samples_split': Range(2,10),
  'min_weight_fraction_leaf': [0.0],
- 'n_estimators': Range(20,300),
+ 'n_estimators': Range(10,300),
  'n_jobs': [None],
  'oob_score': [False],
  'random_state': [None],
@@ -216,5 +203,19 @@ if __name__=="__main__":
     for cl in map(str,classifiers):
         print (f"'{cl.replace('Classifier','')[:-2]}' : ({cl},{cl[:-2]}param),")
     print ("}")
+
+classifiers = {
+        'KNeighbors' : (KNeighborsClassifier(),KNeighborsClassifierparam),
+        'SVC' : (SVC(),SVCparam),
+        'DecisionTree' : (DecisionTreeClassifier(),DecisionTreeClassifierparam),
+        'MLP' : (MLPClassifier(),MLPClassifierparam),
+        'AdaBoost' : (AdaBoostClassifier(),AdaBoostClassifierparam),
+        'GaussianNB' : (GaussianNB(),GaussianNBparam),
+        'QuadraticDiscriminantAnalysis' : (QuadraticDiscriminantAnalysis(),QuadraticDiscriminantAnalysisparam),
+        'RandomForest' : (RandomForestClassifier(),RandomForestClassifierparam),
+        'ExtraTrees' : (ExtraTreesClassifier(),ExtraTreesClassifierparam),
+        'GradientBoosting' : (GradientBoostingClassifier(),GradientBoostingClassifierparam),
+        }
+
 
 
