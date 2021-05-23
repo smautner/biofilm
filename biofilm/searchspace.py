@@ -49,7 +49,7 @@ KNeighborsClassifierparam = {'algorithm': ['auto'],
  'n_neighbors': [5],
  'p': [2],
  'weights': ['uniform']}
-SVCparam = {'C': [1.0],
+SVCparam = {'C': np.arange(0.001,10,0.001),
  'break_ties': [False],
  'cache_size': [200],
  'class_weight': [None],

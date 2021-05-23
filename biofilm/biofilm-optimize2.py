@@ -7,7 +7,7 @@ from sklearn.model_selection import RandomizedSearchCV as RSCV
 import searchspace as ss
 
 optidoc='''
---method str xtratrees  whatever is specified in searchspace.py
+--method str ExtraTrees  whatever is specified in searchspace.py
 --out str numpycompressdumpgoeshere_lol
 --features str whereIdumpedMyFeatures
 '''
@@ -50,7 +50,6 @@ def optimize2(X,Y,x,y, args):
 if __name__ == "__main__":
     args = opts.parse(optidoc)
     data = datautil.getfolds()
-    name = 'lol'
     np.savez_compressed(
             args.out, [optimize2(X,Y,x,y,args) for X,Y,x,y in data])
 
