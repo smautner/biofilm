@@ -5,11 +5,14 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 
 datadoc='''
+# theese are the options for reading data
 --infile str myNumpyDump
 --randinit int -1
 --folds int 5
 --subsample int -1
 --Z bool False
+
+
 '''
 
 def getfolds():

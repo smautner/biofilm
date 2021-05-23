@@ -18,11 +18,13 @@ import matplotlib.pyplot as plt
 
 
 featdoc='''
+# options for feature selection:
 --method str lasso  or svm or all or corr or variance
 --out str numpycompressdumpgoeshere
 --plot bool False
-
 --svmparamrange float+ 0.01 0.15 0.001
+
+
 '''
 
 def lasso(X,Y,x,y,args):
