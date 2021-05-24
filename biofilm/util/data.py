@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 datadoc='''
 # theese are the options for reading data
 --infile str myNumpyDump
---randinit int -1
+--randinit int 1337
 --folds int 5
 --subsample int -1
 --Z bool False
