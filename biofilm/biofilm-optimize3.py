@@ -18,17 +18,18 @@ def optimize(X,Y,x,y, args):
     clf, params = ss.classifiers[args.method]
     # Randomized search on hyper parameters
     #https://scikit-optimize.github.io/stable/auto_examples/sklearn-gridsearchcv-replacement.html
-    searcher = BayesSearchCV(clf,params,n_iter=50,cv=3)
+    searcher = BayesSearchCV(clf,params,n_iter=20,cv=3,n_jobs=30)
     searcher.fit(X, Y )
     #print (searcher.__dict__)
-    print(f1_score(y, searcher.predict(x)))
+    r=f1_score(y, searcher.predict(x))
+    print(r)
+    return r
 
 if __name__ == "__main__":
     args = opts.parse(optidoc)
     data = datautil.getfolds()
-    np.savez_compressed(
-            args.out, [optimize(X,Y,x,y,args) for X,Y,x,y in data])
-
-
+    res = [optimize(X,Y,x,y,args) for X,Y,x,y in data]
+    print(np.mean(res))
+    np.savez_compressed( args.out,res)
 
 

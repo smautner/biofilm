@@ -16,6 +16,7 @@ from imblearn.over_sampling import RandomOverSampler
 from lmz import *
 import numpy as np
 
+from scipy.stats import randint,uniform
 
 
 
@@ -130,7 +131,30 @@ RandomForestClassifierparam = {'bootstrap': [True],
  'verbose': [0],
  'warm_start': [False]}
 
+
 ExtraTreesClassifierparam = {'bootstrap': [False, True],
+ 'ccp_alpha': [0.0],
+ 'class_weight': [None, 'balanced'],
+ 'criterion': ['gini','entropy'],
+ 'max_depth': randint(2,30),
+ 'max_features': ['auto'],
+ 'max_leaf_nodes': [None],
+ 'max_samples': [None],
+ 'min_impurity_decrease': uniform(0,0.1),
+ 'min_impurity_split': [None],
+ 'min_samples_leaf': randint(1,10),
+ 'min_samples_split': randint(2,10),
+ 'min_weight_fraction_leaf': [0.0],
+ 'n_estimators': randint(6,200),
+ 'n_jobs': [None],
+ 'oob_score': [False],
+ 'random_state': [None],
+ 'verbose': [0],
+ 'warm_start': [False]}
+
+
+
+ExtraTreesClassifierparam_skopt = {'bootstrap': [False, True],
  'ccp_alpha': [0.0],
  'class_weight': [None, 'balanced'],
  'criterion': ['gini','entropy'],
@@ -149,7 +173,6 @@ ExtraTreesClassifierparam = {'bootstrap': [False, True],
  'random_state': [None],
  'verbose': [0],
  'warm_start': [False]}
-
 
 
 GradientBoostingClassifierparam = {'ccp_alpha': [0.0],
@@ -214,6 +237,7 @@ classifiers = {
         'QuadraticDiscriminantAnalysis' : (QuadraticDiscriminantAnalysis(),QuadraticDiscriminantAnalysisparam),
         'RandomForest' : (RandomForestClassifier(),RandomForestClassifierparam),
         'ExtraTrees' : (ExtraTreesClassifier(),ExtraTreesClassifierparam),
+        'ExtraTreesSKO' : (ExtraTreesClassifier(),ExtraTreesClassifierparam_skopt),
         'GradientBoosting' : (GradientBoostingClassifier(),GradientBoostingClassifierparam),
         }
 

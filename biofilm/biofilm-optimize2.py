@@ -29,7 +29,8 @@ def optimize(X,Y,x,y, args):
                 return_train_score=True)
     searcher.fit(X, Y)
     #print (searcher.__dict__)
-    print(f1_score(y, searcher.predict(x)))
+    res = f1_score(y, searcher.predict(x))
+    return res
 
 
 def optimize2(X,Y,x,y, args):
@@ -38,20 +39,21 @@ def optimize2(X,Y,x,y, args):
     searcher = HRSCV(clf,
                 params,
                 scoring='f1',
-                n_jobs=1,
+                n_jobs=30,
                 cv=3,
                 random_state=42,
                 error_score=np.nan,
                 return_train_score=True)
     searcher.fit(X, Y)
-    # todo: print mean of sorted train scores.. 
-    print(f1_score(y, searcher.predict(x)))
+    res = f1_score(y, searcher.predict(x))
+    return res
 
 if __name__ == "__main__":
     args = opts.parse(optidoc)
     data = datautil.getfolds()
-    np.savez_compressed(
-            args.out, [optimize2(X,Y,x,y,args) for X,Y,x,y in data])
+    res = [optimize2(X,Y,x,y,args) for X,Y,x,y in data]
+    print(np.mean(res))
+    np.savez_compressed( args.out,res)
 
 
 

@@ -14,7 +14,7 @@ optidoc='''
 '''
 
 from hpsklearn.components import *
-
+#pip install git+https://github.com/hyperopt/hyperopt-sklearn 
 def optimize(X,Y,x,y, args):
     estim = HyperoptEstimator(
             classifier=eval(args.method)('myguy'),
@@ -25,16 +25,18 @@ def optimize(X,Y,x,y, args):
             ex_preprocs=[]
             )
     estim.fit(X,Y)
-    print("TESTSCORE:",f1_score(y,estim.predict(x) ))
+    res = f1_score(y,estim.predict(x) )
+    print("TESTSCORE:",res)
+    return res
     
 
 
 if __name__ == "__main__":
     args = opts.parse(optidoc)
     data = datautil.getfolds()
-    name = 'lol'
-    np.savez_compressed(
-            args.out, [optimize(X,Y,x,y,args) for X,Y,x,y in data])
+    res = [optimize(X,Y,x,y,args) for X,Y,x,y in data]
+    print(np.mean(res))
+    np.savez_compressed( args.out,res)
 
 
 
