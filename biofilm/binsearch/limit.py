@@ -7,33 +7,29 @@ from scipy.stats.mstats import pearsonr
 import math
 
 
-def limit(scores_values,searchspace, paramname, fullsearchspace):
+def limit(scores_values,searchspace, paramname, fullsearchspace, thresh):
 
     # categorical data:
-    bestV = [v for s,v in scores_values[:10]]
+    bestV = [v for s,v in scores_values[:5]]
     if isinstance(fullsearchspace,list): 
-        return  bestV,0
+        return  bestV
    
     # have we converged already? if no lets proceed by gettin ght correlation
     CUTLEN = len(scores_values)
     data = np.array(scores_values[:CUTLEN])
     if sum(data[:,1] ==  data[:,1][0]) == CUTLEN:
-        return bestV,0
+        return bestV
     corr = pearsonr(data[:,0],data[:,1])[0]
     
     # fix the type of searchspave:
     searchspace = fixtype(searchspace)
-    
-    
-    ok = 0
-    if  abs(corr) > 0.1:
+    if  abs(corr) > thresh:
         searchspace2 =   half(searchspace, corr > 0)
         #print (paramname,searchspace.args, searchspace2.args)
+        if abs(corr) > .5: # lets do it again if the correlation is good
+            searchspace2 =   half(searchspace2, corr > 0)
         searchspace = searchspace2
-        ok = 1
-
-
-    return searchspace, ok
+    return searchspace
 
 def fixtype(space):
     if isinstance(space, list):

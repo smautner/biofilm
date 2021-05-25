@@ -38,9 +38,9 @@ def optimize(X,Y,x,y, args):
                 random_state=None,
                 error_score=np.nan,
                 return_train_score=True)
-
     searcher.fit(X,Y)
     res = f1_score(y, searcher.predict(x))
+    return res, searcher.best_params_
     if False:
         print(res)
         exit()
@@ -50,11 +50,21 @@ def optimize(X,Y,x,y, args):
         exit()
     return res
 
+
+def mergedi(di):
+    d = {}
+    for k in di[0].keys():
+        d[k] = [dd[k] for dd in di]
+    return d
+
+
 if __name__ == "__main__":
     args = opts.parse(optidoc)
     data = datautil.getfolds()
     res = [optimize(X,Y,x,y,args) for X,Y,x,y in data]
-    print(np.mean(res))
+    res, di = Transpose(res)
+    #pprint(mergedi(di))
+    print(np.mean(res), res)
     dat = opts.parse(datautil.datadoc)
     #np.savez_compressed(out,res)
 

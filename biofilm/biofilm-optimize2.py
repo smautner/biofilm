@@ -20,7 +20,7 @@ def optimize(X,Y,x,y, args):
     # Randomized search on hyper parameters
     searcher = RSCV(clf,
                 params,
-                n_iter=30,
+                n_iter=40,
                 scoring='f1',
                 n_jobs=5,
                 cv=3,
@@ -51,7 +51,7 @@ def optimize2(X,Y,x,y, args):
 if __name__ == "__main__":
     args = opts.parse(optidoc)
     data = datautil.getfolds()
-    res = [optimize2(X,Y,x,y,args) for X,Y,x,y in data]
+    res = [optimize(X,Y,x,y,args) for X,Y,x,y in data]
     print(np.mean(res))
     np.savez_compressed( args.out,res)
 

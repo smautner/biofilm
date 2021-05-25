@@ -8,6 +8,7 @@ import copy
 from lmz import *
 import scipy
 from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedShuffleSplit as SSSplit
 from scipy.stats.mstats import pearsonr
 import binsearch.limit as limit
 
@@ -16,21 +17,16 @@ class binsearch(RSCV):
         assert self.n_iter >=25, "n_iter should be at least 25"
         # we want to change theese:
         self.binlog = 0,{}
-        self.param_distributions = self.binsearch(X,y,self.param_distributions) 
+        self.param_distributions = self.binsearch(X,y) 
+        #pparm(self.param_distributions)
         super().fit(X,y,groups=groups,**fit_params)
 
-    def binsearch(self,x,y, params):
-        nuparams = copy.deepcopy(params)
+    def binsearch(self,x,y, estipoints = 20):
+        nuparams = copy.deepcopy(self.param_distributions)
         for i in range(2):
-        #while self.n_iter > 15:
-            r = self.halfsearch(x,y, nuparams, 20)
-            mapa = max(r, key = lambda x:x[0])
-            if mapa[0] > self.binlog[0]:
-                self.binlog = mapa
-            nuparams , contchrchange = self.limitparams(r,nuparams, params)
-            self.n_iter -=10 
-            #print ("numchanges", contchrchange) 
-            #pparm(nuparams)
+            r = self.halfsearch_cool(x,y, nuparams, estipoints)
+            nuparams = self.limitparams(r,nuparams, thresh = .15)
+            self.n_iter -= int(estipoints/2)
         return nuparams
 
     def halfsearch(self,X,Y, params, niter):
@@ -53,14 +49,33 @@ class binsearch(RSCV):
         li = lambda di: Zip(di['mean_test_score'], di['params'])
         return  li(r)+li(s)
 
-    def limitparams(self,best,curparams, allparams):
+    def halfsearch_cool(self,X,Y, params, niter):
+        train_size  = (self.cv-1)/(self.cv*2)
+        test_size= (1-train_size)/2 
+        splitter = SSSplit(self.cv, train_size=train_size) 
+        # Randomized search on hyper parameters
+        searcher = RSCV(self.estimator,
+                    params,
+                    n_iter=niter,
+                    scoring=self.scoring,
+                    n_jobs=self.n_jobs,
+                    cv=splitter,
+                    refit=False,
+                    random_state=None,
+                    error_score=np.nan,
+                    return_train_score=True)
+        r=searcher.fit(X,Y).cv_results_
+        li = lambda di: Zip(di['mean_test_score'], di['params'])
+        return  li(r)
+
+
+    def limitparams(self,best,curparams, thresh):
+        allparams = self.param_distributions
         best.sort(reverse=True, key=lambda x:x[0])
         nuparams={}
-        ch = 0
         for k,v in curparams.items():
-            nuparams[k],grr= limit.limit([ (score,di[k]) for score, di in best ] ,curparams[k],k, allparams[k])
-            ch += grr
-        return nuparams,ch
+            nuparams[k]= limit.limit([ (score,di[k]) for score, di in best ] ,curparams[k],k, allparams[k], thresh)
+        return nuparams
 
 
 def pparm(params):
