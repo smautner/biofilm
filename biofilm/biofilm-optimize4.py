@@ -30,7 +30,7 @@ def optimize(X,Y,x,y, args):
     clf, params = ss.classifiers[args.method]
     searcher = bs.binsearch.binsearch(clf,
                 params,
-                n_iter=30,
+                n_iter=40,
                 scoring='f1',
                 n_jobs=5,
                 cv=3,
