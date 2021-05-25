@@ -30,7 +30,7 @@ def optimize(X,Y,x,y, args):
     clf, params = ss.classifiers[args.method]
     searcher = bs.binsearch.binsearch(clf,
                 params,
-                n_iter=40,
+                n_iter=30,
                 scoring='f1',
                 n_jobs=5,
                 cv=3,
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     #pprint(mergedi(di))
     print(np.mean(res), res)
     dat = opts.parse(datautil.datadoc)
-    #np.savez_compressed(out,res)
+    np.savez_compressed(args.out,np.mean(res))
 
 
 # print avg in the end

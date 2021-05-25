@@ -20,7 +20,7 @@ def optimize(X,Y,x,y, args):
     # Randomized search on hyper parameters
     searcher = RSCV(clf,
                 params,
-                n_iter=40,
+                n_iter=30,
                 scoring='f1',
                 n_jobs=5,
                 cv=3,
