@@ -1,5 +1,5 @@
 import dirtyopts as opts
-import util.data as datautil
+import biofilm.util.data as datautil
 import numpy as np
 import structout as so
 from hpsklearn import HyperoptEstimator

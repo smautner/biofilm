@@ -1,11 +1,11 @@
 import dirtyopts as opts
-import util.data as datautil
+import biofilm.util.data as datautil
 import binsearch as bs
 import numpy as np
 import structout as so
 from sklearn.metrics import  f1_score
 from sklearn.model_selection import RandomizedSearchCV as RSCV
-import searchspace as ss
+import biofilm.searchspace as ss
 from pprint import pprint
 import matplotlib
 matplotlib.use('module://matplotlib-sixel')

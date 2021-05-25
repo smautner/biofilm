@@ -10,7 +10,7 @@ import scipy
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import StratifiedShuffleSplit as SSSplit
 from scipy.stats.mstats import pearsonr
-import binsearch.limit as limit
+import biofilm.binsearch.limit as limit
 
 class binsearch(RSCV): 
     def fit(self, X, y=None, *, groups=None, **fit_params):

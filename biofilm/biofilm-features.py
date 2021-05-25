@@ -1,5 +1,5 @@
 import dirtyopts as opts
-import util.data as datautil
+import biofilm.util.data as datautil
 import numpy as np
 from sklearn.linear_model import SGDClassifier as sgd, LassoCV
 from sklearn.svm import LinearSVC
@@ -13,7 +13,7 @@ import random
 import ubergauss
 from scipy.stats import spearmanr
 matplotlib.use('module://matplotlib-sixel')
-import util.draw as draw
+import biofilm.util.draw as draw
 import matplotlib.pyplot as plt
 
 
