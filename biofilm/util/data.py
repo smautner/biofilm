@@ -12,7 +12,7 @@ datadoc='''
 --subsample int -1
 --Z bool False
 
-
+# TODO specipy a single fold  :) 
 '''
 
 def getfolds():

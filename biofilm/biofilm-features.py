@@ -24,7 +24,6 @@ featdoc='''
 --plot bool False
 --svmparamrange float+ 0.01 0.15 0.001
 
-
 '''
 
 def lasso(X,Y,x,y,args):
@@ -66,12 +65,22 @@ def variance(X,Y,x,y,args):
     var = np.var(X, axis = 0)
     res = (autothresh(var))
     so.lprint(res.astype(np.int64))
+    if args.plot:
+        # TODO 
+        # sort var 
+        # lprint 
+        pass
+
     return res
 
 def corr(X,Y,x,y,args):
     cor = np.array([spearmanr(X[:,column],Y)[0] for column in range(X.shape[1])])
     res = (autothresh(cor))
     so.lprint(res.astype(np.int64))
+    if args.plot:
+        # sort corr  TODO 
+        # lprint 
+        pass
     return res
 
 def all(X,y,args):
