@@ -10,26 +10,39 @@ import math
 def limit(scores_values,searchspace, paramname, fullsearchspace, thresh):
 
     # categorical data:
-    bestV = [v for s,v in scores_values[:5]]
     if isinstance(fullsearchspace,list): 
-        return  bestV
+        return  choosecategorical(scores_values, fullsearchspace)
    
     # have we converged already? if no lets proceed by gettin ght correlation
     CUTLEN = len(scores_values)
     data = np.array(scores_values[:CUTLEN])
     if sum(data[:,1] ==  data[:,1][0]) == CUTLEN:
-        return bestV
+        return [scores_values[0][1]]
     corr = pearsonr(data[:,0],data[:,1])[0]
     
     # fix the type of searchspave:
     searchspace = fixtype(searchspace)
     if  abs(corr) > thresh:
-        searchspace2 =   half(searchspace, corr > 0)
+        searchspace =   half(searchspace, corr > 0)
         #print (paramname,searchspace.args, searchspace2.args)
         if abs(corr) > .5: # lets do it again if the correlation is good
-            searchspace2 =   half(searchspace2, corr > 0)
-        searchspace = searchspace2
+            searchspace =   half(searchspace, corr > 0)
     return searchspace
+
+def choosecategorical(scores_values, fullsearchspace): 
+    scores, values = Transpose(scores_values)
+    scores = np.array(scores)
+    ma = -1
+    va = ''
+    for z in fullsearchspace:
+        if z in values:
+            vscore =np.mean(scores[[ v==z for v in values]])
+            if vscore > ma:
+                ma=vscore
+                va = z
+    return [va]
+
+    
 
 def fixtype(space):
     if isinstance(space, list):

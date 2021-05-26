@@ -6,7 +6,7 @@ set -x 'OPENBLAS_NUM_THREADS' 1
 
 
 set lol -j 10 python biofilm-optimize4.py --infile DATA.npz --method ExtraTrees
-parallel $lol --randinit {1} --out res/{1} ::: (seq 2)
+parallel $lol --randinit {1} --out res/{1} ::: (seq 10)
 
 
 function aaa
@@ -28,5 +28,5 @@ r = [di['data'] for di in r]
 print(np.mean(r))"
 end 
 
-
 aaa
+
