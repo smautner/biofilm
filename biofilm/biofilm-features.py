@@ -15,7 +15,7 @@ from scipy.stats import spearmanr
 matplotlib.use('module://matplotlib-sixel')
 import biofilm.util.draw as draw
 import matplotlib.pyplot as plt
-
+from sklearn.linear_model import LogisticRegressionCV
 
 featdoc='''
 # options for feature selection:
@@ -32,6 +32,13 @@ def lasso(X,Y,x,y,args):
         testscore, cutoff = max([(f1_score(Y,model.predict(X) > t),t) for t in np.arange(.3,.7,.001)])
         print ('score: %.2f alpha: %.4f  features: %d  ERRORPATH, FEATCOUNT' % ( f1_score(y,model.predict(x)>cutoff), model.alpha_, (model.coef_>0.0001).sum()))
         draw.lasso(model,X,Y)
+    res =  model.coef_ > 0.0001
+    so.lprint(res.astype(np.int64))
+    return res
+
+def logistic(X,Y,x,y,args):
+    model = LogisticRegressionCV(Cs=10, penalty = 'l1').fit(X,Y)
+    # TODO test this, one may want to change Cs... 
     res =  model.coef_ > 0.0001
     so.lprint(res.astype(np.int64))
     return res

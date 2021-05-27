@@ -31,6 +31,7 @@ import matplotlib
 matplotlib.use('module://matplotlib-sixel')
 import matplotlib.pyplot as plt
 plt.plot(r)
+plt.show()
 "
 end 
 
