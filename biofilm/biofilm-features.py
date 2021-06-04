@@ -110,9 +110,8 @@ def VarianceInflation(X,Y,x,y):
 
 def main():
     args = opts.parse(featdoc)
-    data = datautil.getfolds()
-    np.savez_compressed(
-            args.out, [eval(args.method)(X,Y,x,y,args) for X,Y,x,y in data])
+    XYxy = datautil.getfold()
+    np.savez_compressed(args.out, *eval(args.method)(*XYxy, args) ) 
 
 
 if __name__ == "__main__":
