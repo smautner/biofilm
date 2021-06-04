@@ -14,6 +14,7 @@ datadoc='''
 --Z bool False
 --foldselect int -1
 --featurefile str
+--featurecount str -1 
 # TODO specipy a single fold  :) 
 '''
 
@@ -21,18 +22,25 @@ def getfolds():
     args= dirtyopts.parse(datadoc).__dict__
     return loadfolds(**args)
 
-def loadfolds(infile,randinit, folds, subsample, Z, loader):
+def loadfolds(infile,randinit, folds, subsample, Z, loader,foldselect, featurefile, featurecount ):
     
     if not loader: 
-        d = np.load(infile)
+        d = np.load(infile,allow_pickle=True)
         X,y = [d[f'arr_{x}'] for x in range(2)]
     else:
         eval(open(loader,'r').read()) 
         X,y = read(infile)
     
     if featurefile:
-        ft = np.load(featurefile)['arr_0']
-        X=X[:,ft%2==1] # works with 0/1 and False/True
+        if featurecount > 0: # size constrained list
+            ft_quality = np.load(featurefile, allow_pickle=True)['arr_1']
+            
+            want=np.argsort(feature_quality)[-featurecount:]
+            X=X[:,want]
+            
+        else: # default list 
+            ft = np.load(featurefile)['arr_0']
+            X=X[:,ft%2==1] # works with 0/1 and False/True
 
     if Z:
         X = StandardScaler().fit_transform(X)
@@ -44,7 +52,6 @@ def loadfolds(infile,randinit, folds, subsample, Z, loader):
     return kfold(X,y,folds,randseed=None if randinit == -1 else randinit)
 
 def kfold(X, y, n_splits=5, randseed=None, shuffle=True, foldselect =-1):
-
     kf = StratifiedKFold(n_splits=n_splits, shuffle=shuffle, random_state=randseed)
     if foldselect == -1:
         for train, test in kf.split(X, y):
