@@ -95,9 +95,13 @@ def all(X,y,args):
 
 
 
-if __name__ == "__main__":
+def main():
     args = opts.parse(featdoc)
     data = datautil.getfolds()
     np.savez_compressed(
             args.out, [eval(args.method)(X,Y,x,y,args) for X,Y,x,y in data])
+
+
+if __name__ == "__main__":
+    main()
 

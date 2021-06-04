@@ -105,10 +105,12 @@ setup(
     package_data={},
     url='https://github.com/smautner/biofilm',
     license='GPLv3',
+
     description='another opts parser',
     #long_description=open('README.md').read(),
     install_requires=[ 
         'scikit-learn','ubergauss','lmz','dirtyopts','numpy', 'structout'
         ],
+    entry_points = { 'console_scripts': ['biofilmop=biofilm.biofilm-optimize:main','biofilmft=biofilm.biofilm-features:main'] },
     cmdclass={'sdist': sdist, 'install': install}
 )

@@ -30,14 +30,15 @@ def optimize(X,Y,x,y, args):
     return res
     
 
-
-if __name__ == "__main__":
+def main():
     args = opts.parse(optidoc)
     data = datautil.getfolds()
     res = [optimize(X,Y,x,y,args) for X,Y,x,y in data]
     print(np.mean(res))
     np.savez_compressed( args.out,res)
 
+if __name__ == "__main__":
+    main()
 
 
 
