@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.utils import resample
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
-
+from lmz import * 
 datadoc='''
 # theese are the options for reading data
 --infile str myNumpyDump
@@ -37,7 +37,7 @@ def loadfolds(infile,randinit, folds, subsample, Z, loader,foldselect, featurefi
     if subsample > 1:
         X,y= resample(X,y,replace=False,
                 n_samples=subsample,
-                random_state=randinit if randinit != -1 else None,
+                random_state=randinit,
                 stratify =y) 
 
     if featurefile:
@@ -54,11 +54,11 @@ def loadfolds(infile,randinit, folds, subsample, Z, loader,foldselect, featurefi
     if Z:
         X = StandardScaler().fit_transform(X)
 
-    return   kfold(X,y,folds,randseed=None if randinit == -1 else randinit)
+    return  iterselect( kfold(X,y,folds,randseed=randinit), foldselect)
 
-def kfold(X, y, n_splits=5, randseed=None, shuffle=True, foldselect =0):
+def kfold(X, y, n_splits=5, randseed=None, shuffle=True):
     kf = StratifiedKFold(n_splits=n_splits, shuffle=shuffle, random_state=randseed)
-    train, test = kf.split(X, y)[foldselect]
-    return  X[train], y[train], X[test], y[test]
+    for train,test in  kf.split(X, y):
+        yield X[train], y[train], X[test], y[test]
 
 

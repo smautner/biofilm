@@ -1,4 +1,6 @@
 import dirtyopts as opts
+from lmz import *
+
 import biofilm.util.data as datautil
 import numpy as np
 from sklearn.linear_model import SGDClassifier as sgd, LassoCV
@@ -37,14 +39,15 @@ def lasso(X,Y,x,y,args):
         print ('score: %.2f alpha: %.4f  features: %d  ERRORPATH, FEATCOUNT' % ( f1_score(y,model.predict(x)>cutoff), model.alpha_, (model.coef_>0.0001).sum()))
         draw.lasso(model,X,Y)
     quality = abs(model.coef_)
+    print(f" quality{quality}")
     res =  quality > 0.0001
     so.lprint(res.astype(np.int64))
     return res, quality
 
 def logistic(X,Y,x,y,args):
-    model = LogisticRegressionCV(Cs=10, penalty = 'l1').fit(X,Y)
-    # TODO test this, one may want to change Cs... 
-    quality = abs(model.coef_)
+    model = LogisticRegressionCV(Cs=10, penalty = 'l1',n_jobs = -1, max_iter = 1000, solver ='liblinear').fit(X,Y)
+    # TODO test this, one may want to change Cs...  also liblinear / saga
+    quality = abs(model.coef_.ravel())
     res =  quality > 0.0001
     so.lprint(res.astype(np.int64))
     return res, quality
@@ -63,6 +66,7 @@ def svm(X,Y,x,y,args):
 
         err = search.cv_results_["mean_test_score"]
         so.lprint(err)
+
     quality = abs(model.coef_)
     res = ( quality > 0.0001).squeeze()
     so.lprint(res.astype(np.int64))
@@ -101,11 +105,29 @@ def all(X,Y,x,y,args):
     return np.full(len(y),1) ,  np.full(len(y),1)
 
 
-def VarianceInflation(X,Y,x,y):
-    VIF = np.array([variance_inflation_factor(X.values, i) for i in range(X.shape[1])])
+def VarianceInflation(X,Y,x,y,args):
+    d=[]
+    VIFALL = np.array([variance_inflation_factor(X, i) for i in range(X.shape[1])])
+    for rep in Range(X):
+        VIF = np.array([variance_inflation_factor(X, i) for i in range(X.shape[1])])
+        print(f" {VIF}")
+        if max(VIF)> 5:
+            e = np.nanargmax(VIF)
+            X[:,e] = 0
+            d.append(e)
+        else:
+            break
+    else:
+        print(f"  something went wrong")
+
+    #numpy.delete(arr, obj, axis=None) TODO remove one by one
     # 5 is the recommended cutoff, do i need to recalculate after removing each? molla
     # return negative VIF because when selecting in dataloader negative values are bad
-    return VIF > 5 , -VIF 
+    #print(f"  {VIF}")
+    r = np.full(X.shape[1], True)
+    r[d] = False
+    so.lprint(r)
+    return  r,-VIFALL
 
 
 def main():
