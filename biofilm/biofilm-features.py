@@ -16,15 +16,19 @@ matplotlib.use('module://matplotlib-sixel')
 import biofilm.util.draw as draw
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegressionCV
+from statsmodels.stats.outliers_influence import variance_inflation_factor
 
-featdoc='''
+
+featdoc=''' 
 # options for feature selection:
---method str lasso  or svm or all or corr or variance
+--method str lasso  svm all corr variance logistic relaxedlasso  VarianceInflation
 --out str numpycompressdumpgoeshere
 --plot bool False
 --svmparamrange float+ 0.01 0.15 0.001
 
 '''
+def relaxedlasso(X,Y,x,y,args):
+    print("RELAXED LASSO NOT IMPLEMENTD ") # TODO 
 
 def lasso(X,Y,x,y,args):
     model = LassoCV(n_alphas = 100).fit(X,Y)
@@ -32,16 +36,18 @@ def lasso(X,Y,x,y,args):
         testscore, cutoff = max([(f1_score(Y,model.predict(X) > t),t) for t in np.arange(.3,.7,.001)])
         print ('score: %.2f alpha: %.4f  features: %d  ERRORPATH, FEATCOUNT' % ( f1_score(y,model.predict(x)>cutoff), model.alpha_, (model.coef_>0.0001).sum()))
         draw.lasso(model,X,Y)
-    res =  model.coef_ > 0.0001
+    quality = abs(model.coef_)
+    res =  quality > 0.0001
     so.lprint(res.astype(np.int64))
-    return res
+    return res, quality
 
 def logistic(X,Y,x,y,args):
     model = LogisticRegressionCV(Cs=10, penalty = 'l1').fit(X,Y)
     # TODO test this, one may want to change Cs... 
-    res =  model.coef_ > 0.0001
+    quality = abs(model.coef_)
+    res =  quality > 0.0001
     so.lprint(res.astype(np.int64))
-    return res
+    return res, quality
 
 
 def svm(X,Y,x,y,args): 
@@ -57,9 +63,10 @@ def svm(X,Y,x,y,args):
 
         err = search.cv_results_["mean_test_score"]
         so.lprint(err)
-    res = ( model.coef_ > 0.0001).squeeze()
+    quality = abs(model.coef_)
+    res = ( quality > 0.0001).squeeze()
     so.lprint(res.astype(np.int64))
-    return res
+    return res, quality
 
 def autothresh(arr):
     arr=abs(arr)
@@ -78,21 +85,27 @@ def variance(X,Y,x,y,args):
         # lprint 
         pass
 
-    return res
+    return res, var
 
 def corr(X,Y,x,y,args):
-    cor = np.array([spearmanr(X[:,column],Y)[0] for column in range(X.shape[1])])
+    cor = abs(np.array([spearmanr(X[:,column],Y)[0] for column in range(X.shape[1])]))
     res = (autothresh(cor))
     so.lprint(res.astype(np.int64))
     if args.plot:
         # sort corr  TODO 
         # lprint 
         pass
-    return res
+    return res, cor 
 
-def all(X,y,args):
-    return np.full(len(y),1)
+def all(X,Y,x,y,args):
+    return np.full(len(y),1) ,  np.full(len(y),1)
 
+
+def VarianceInflation(X,Y,x,y):
+    VIF = np.array([variance_inflation_factor(X.values, i) for i in range(X.shape[1])])
+    # 5 is the recommended cutoff, do i need to recalculate after removing each? molla
+    # return negative VIF because when selecting in dataloader negative values are bad
+    return VIF > 5 , -VIF 
 
 
 def main():
