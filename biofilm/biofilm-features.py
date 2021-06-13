@@ -26,7 +26,7 @@ featdoc='''
 --method str lasso  svm all corr variance logistic relaxedlasso  VarianceInflation
 --out str numpycompressdumpgoeshere
 --plot bool False
---svmparamrange float+ 0.01 0.15 0.001
+--svmparamrange float+ 0.01 0.15 100
 
 '''
 def relaxedlasso(X,Y,x,y,args):
@@ -39,14 +39,15 @@ def lasso(X,Y,x,y,args):
         print ('score: %.2f alpha: %.4f  features: %d  ERRORPATH, FEATCOUNT' % ( f1_score(y,model.predict(x)>cutoff), model.alpha_, (model.coef_>0.0001).sum()))
         draw.lasso(model,X,Y)
     quality = abs(model.coef_)
-    print(f" quality{quality}")
     res =  quality > 0.0001
     so.lprint(res.astype(np.int64))
     return res, quality
 
 def logistic(X,Y,x,y,args):
     model = LogisticRegressionCV(Cs=10, penalty = 'l1',n_jobs = -1, max_iter = 1000, solver ='liblinear').fit(X,Y)
+    #model = LogisticRegressionCV(Cs=10, penalty = 'l2',n_jobs = -1, max_iter = 1000).fit(X,Y)
     # TODO test this, one may want to change Cs...  also liblinear / saga
+    print(f" {model.coef_}")
     quality = abs(model.coef_.ravel())
     res =  quality > 0.0001
     so.lprint(res.astype(np.int64))
@@ -54,18 +55,39 @@ def logistic(X,Y,x,y,args):
 
 
 def svm(X,Y,x,y,args): 
-    clf = LinearSVC(class_weight = 'balanced', max_iter=10000)
-    param_dist = {"C": np.arange(*args.svmparamrange) , 'penalty':['l1'],'dual':[False]}
+    clf = LinearSVC(class_weight = 'balanced', max_iter=1000)
+    param_dist = {"C": np.linspace(*args.svmparamrange[:2], int(args.svmparamrange[2])) , 'penalty':['l1'],'dual':[False]}
+    #param_dist = {"C": np.logspace(-4,-2,100), 'penalty':['l1'],'dual':[False]}
     search = GridSearchCV(clf,param_dist, n_jobs=10, scoring='f1')
     search.fit(X, Y)
 
     model = search.best_estimator_
     if args.plot:
-        print ("numft %d  C %.3f  testscore %.2f SCOREPATH:" % 
-                ((model.coef_>0.0001 ).sum(),model.C,f1_score(y,model.predict(x))))
+        print ("numft %d  C %.3f  testscore %.3f SCOREPATH:" % 
+                ((abs(model.coef_)>0.0001 ).sum(),model.C,f1_score(y,model.predict(x))))
 
         err = search.cv_results_["mean_test_score"]
         so.lprint(err)
+
+    quality = abs(model.coef_)
+    res = ( quality > 0.0001).squeeze()
+    so.lprint(res.astype(np.int64))
+    return res, quality
+
+def svm2(X,Y,x,y,args): 
+    """noone should use this"""
+    clf = LinearSVC(class_weight = 'balanced', max_iter=1000, penalty='l1', dual=False)
+    from sklearn.model_selection import cross_val_score
+    import biofilm.binsearch as bs
+    def scr(C):
+        clf.C=C
+        return np.mean(cross_val_score(clf,X,Y,n_jobs=3,cv=3, scoring = 'f1', error_score = 0))
+    a,path=bs.optimize(scr,0.001,3,debug=True)
+    clf.C=a
+    model = clf.fit(X, Y)
+
+    if args.plot:
+        print("scr:",f1_score(y,model.predict(x)), f"C: {a}")
 
     quality = abs(model.coef_)
     res = ( quality > 0.0001).squeeze()
@@ -84,6 +106,7 @@ def variance(X,Y,x,y,args):
     res = (autothresh(var))
     so.lprint(res.astype(np.int64))
     if args.plot:
+        so.lprint(var)
         # TODO 
         # sort var 
         # lprint 
@@ -98,6 +121,7 @@ def corr(X,Y,x,y,args):
     if args.plot:
         # sort corr  TODO 
         # lprint 
+        so.lprint(cor)
         pass
     return res, cor 
 
@@ -110,7 +134,8 @@ def VarianceInflation(X,Y,x,y,args):
     VIFALL = np.array([variance_inflation_factor(X, i) for i in range(X.shape[1])])
     for rep in Range(X):
         VIF = np.array([variance_inflation_factor(X, i) for i in range(X.shape[1])])
-        print(f" {VIF}")
+        VIF= np.nan_to_num(VIF)
+        so.lprint(VIF)
         if max(VIF)> 5:
             e = np.nanargmax(VIF)
             X[:,e] = 0
@@ -127,6 +152,7 @@ def VarianceInflation(X,Y,x,y,args):
     r = np.full(X.shape[1], True)
     r[d] = False
     so.lprint(r)
+    so.lprint(VIFALL)
     return  r,-VIFALL
 
 

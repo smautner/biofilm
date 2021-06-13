@@ -54,7 +54,7 @@ def loadfolds(infile,randinit, folds, subsample, Z, loader,foldselect, featurefi
     if Z:
         X = StandardScaler().fit_transform(X)
 
-    return  iterselect( kfold(X,y,folds,randseed=randinit), foldselect)
+    return iterselect( kfold(X,y,folds,randseed=randinit), foldselect)
 
 def kfold(X, y, n_splits=5, randseed=None, shuffle=True):
     kf = StratifiedKFold(n_splits=n_splits, shuffle=shuffle, random_state=randseed)

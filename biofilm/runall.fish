@@ -39,5 +39,4 @@ print(np.mean(r))
 "
 end 
 
-aaa
 
