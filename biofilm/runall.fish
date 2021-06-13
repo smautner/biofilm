@@ -4,8 +4,17 @@ set -x 'OMP_NUM_THREADS' 1
 set -x 'OPENBLAS_NUM_THREADS' 1
 
 
-set lol -j 10 python biofilm-optimize.py --infile DATA.npz --method ExtraTrees
-parallel $lol --randinit {1} --out res/{1} ::: (seq 10)
+
+
+
+
+set para -j 10 python biofilm-features.py 
+
+set load  --infile DATA.npz --randinit {1} --loader ../examples/npzloader.py
+
+set task --method variance
+
+parallel $para $load $task ::: (seq 10)
 
 
 

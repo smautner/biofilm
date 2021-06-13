@@ -104,9 +104,10 @@ def autothresh(arr):
 def variance(X,Y,x,y,args):
     var = np.var(X, axis = 0)
     res = (autothresh(var))
-    so.lprint(res.astype(np.int64))
+    #so.lprint(res.astype(np.int64))
+    #print(res.astype(np.int64))
     if args.plot:
-        so.lprint(var)
+        #so.lprint(var)
         # TODO 
         # sort var 
         # lprint 

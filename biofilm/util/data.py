@@ -25,14 +25,15 @@ def getfold():
     args= dirtyopts.parse(datadoc).__dict__
     return loadfolds(**args)
 
-def loadfolds(infile,randinit, folds, subsample, Z, loader,foldselect, featurefile, featurecount ):
+def loadfolds(infile,loader,randinit, folds,foldselect,  subsample, Z, featurefile, featurecount ):
     
     if not loader: 
         d = np.load(infile,allow_pickle=True)
         X,y = [d[f'arr_{x}'] for x in range(2)]
     else:
-        eval(open(loader,'r').read()) 
-        X,y = read(infile)
+        scope = {}
+        exec(open(loader,'r').read(), scope) 
+        X,y = scope['read'](infile)
     
     if subsample > 1:
         X,y= resample(X,y,replace=False,
