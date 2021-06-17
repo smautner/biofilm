@@ -115,7 +115,7 @@ def variance(X,Y,x,y,args):
     else:
         res = var > args.varthresh
 
-    print(f" features: {sum(res)}/{len(res)} ",end =' ')
+    print(f"var  features: {sum(res)}/{len(res)} ",end =' ')
     #so.lprint(res.astype(np.int64))
     var.sort()
     so.lprint(var, length = 50)
@@ -130,7 +130,7 @@ def variance(X,Y,x,y,args):
 def corr(X,Y,x,y,args):
     cor = abs(np.array([spearmanr(X[:,column],Y)[0] for column in range(X.shape[1])]))
     res, cut= autothresh(cor)
-    print(f" features: {sum(res)}/{len(res)} ",end ='')
+    print(f"cor  features: {sum(res)}/{len(res)} ",end ='')
     cor.sort() 
     so.lprint(cor, length = 50)    
 
@@ -176,7 +176,7 @@ def agglocore(X,Y,x,y,args):
         fl.append(zzz) 
     res = np.hstack(fl)
 
-    print(f" features: {sum(res)}/{len(res)} ",end ='')
+    print(f"agloc features: {sum(res)}/{len(res)} ",end ='')
     return res, np.full(X.shape[1],1)
 
 
@@ -185,7 +185,7 @@ def agglocorr(X,Y,x,y,args):
     cor = abs(np.array([spearmanr(X[:,column],Y)[0] for column in [i for i,e in enumerate(res) if e ]]))
     caccept, cut = autothresh(cor, cov = 'full')
     res[res == 1] = caccept
-    print(f" features: {sum(res)}/{len(res)} ",end ='')
+    print(f"aglo+ features: {sum(res)}/{len(res)} ",end ='')
     if args.plot:
         plt.close()
         plt.title(f"cut: {cut}")

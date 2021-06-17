@@ -7,12 +7,13 @@ from sklearn.metrics import  f1_score
 import pprint
 
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier as ASK2
-import autosklearn.classification 
+from autosklearn.classification import AutoSklearnClassifier as ASK1
 import autosklearn.metrics
 optidoc='''
 --method str any  'extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp'
 --out str jsongoeshere
 --n_jobs int 1
+--debug bool False
 '''
 
 from hpsklearn.components import *
@@ -24,9 +25,12 @@ def optimize(X,Y,x,y, args):
     else:
         estis = [args.method]
 
-    estim = ASK2(
+    estim = ASK1(
             include_estimators = estis,
+            include_preprocessors = ["no_preprocessing"],
             n_jobs = args.n_jobs,
+            ensemble_size = 1, 
+            time_left_for_this_task = 600 if args.debug else 3600,
             metric = autosklearn.metrics.f1,
             )
     estim.fit(X,Y)

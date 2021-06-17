@@ -14,22 +14,21 @@ parallel --record-env
 
 set ftmethods svm all corr variance agglocorr agglocore
 set blacklist kernel genome no
-set randseeds (seq 1 5) 
+set randseeds (seq 1 3) 
 set folds (seq 0 4)
 set samples 10000
+set QUICKFIT False
 
-
-set randseeds (seq 1 1) 
-set samples 1000
-
+#set randseeds (seq 1 1) 
+#set samples 1000
+#set QUICKFIT True
 
 
 set para -j 32 --joblog log.txt --env _ python biofilm-features.py 
-
 set load  --infile pigdataframe2.pkl --randinit {1} --loader ../examples/pigdataframe.py 
 set load2 --foldselect {2} --pigdatasubsample $samples --pigblacklist {4} --Z True
-
 set task --method {3} --out res/{1}_{2}_{3}_{4}.ft --n_jobs 1 --penalty l1 
+
 
 parallel $para $load $load2 $task ::: $randseeds ::: $folds ::: $ftmethods ::: $blacklist
 
@@ -40,10 +39,9 @@ parallel $para $load $load2 $task ::: $randseeds ::: $folds ::: $ftmethods ::: $
 
 
 set para -j 32 --joblog log2.txt --env _ python biofilm-optimize6.py 
-set load3  --featurefile res/{1}_{2}_{3}_{4}.ft.npz
-set task --method any_classifier --out res3/{1}_{2}_{3}_{4}.json
+set task --method any --out res3/{1}_{2}_{3}_{4}.json --debug $QUICKFIT
 
-parallel $para $load $load2 $load3  $task ::: $randseeds ::: $folds ::: $ftmethods ::: $blacklist
+parallel $para $load $load2 --featurefile res/{1}_{2}_{3}_{4}.ft.npz  $task ::: $randseeds ::: $folds ::: $ftmethods ::: $blacklist
 
 
 
