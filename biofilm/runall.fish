@@ -10,9 +10,9 @@ set -x 'OPENBLAS_NUM_THREADS' 1
 
 set para -j 10 python biofilm-features.py 
 
-set load  --infile DATA.npz --randinit {1} --loader ../examples/npzloader.py
+set load  --infile lncRNA.npz --randinit {1} --loader ../examples/npzloader.py
 
-set task --method variance
+set task --method svm --plot True
 
 parallel $para $load $task ::: (seq 10)
 

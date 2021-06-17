@@ -17,8 +17,8 @@ datadoc='''
 --subsample int -1
 --Z bool False
 
---featurefile str
---featurecount str -1 
+--featurefile str 
+--featurecount int -1 
 '''
 
 def getfold():
@@ -41,7 +41,7 @@ def loadfolds(infile,loader,randinit, folds,foldselect,  subsample, Z, featurefi
                 random_state=randinit,
                 stratify =y) 
 
-    if featurefile:
+    if featurefile != '':
         if featurecount > 0: # size constrained list
             ft_quality = np.load(featurefile, allow_pickle=True)['arr_1']
             
@@ -50,6 +50,8 @@ def loadfolds(infile,loader,randinit, folds,foldselect,  subsample, Z, featurefi
             
         else: # default list 
             ft = np.load(featurefile)['arr_0']
+            
+            print(f" {ft.shape}")
             X=X[:,ft%2==1] # works with 0/1 and False/True
 
     if Z:

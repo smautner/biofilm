@@ -3,32 +3,35 @@ import json
 import biofilm.util.data as datautil
 import numpy as np
 import structout as so
-from hpsklearn import HyperoptEstimator
-from hyperopt import tpe
 from sklearn.metrics import  f1_score
 import pprint
 
+from autosklearn.experimental.askl2 import AutoSklearn2Classifier as ASK2
+import autosklearn.classification 
+import autosklearn.metrics
 optidoc='''
---method str any_classifier  svc knn random_forest extra_trees ada_boost gradient_boosting sgd
+--method str any  'extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp'
 --out str jsongoeshere
+--n_jobs int 1
 '''
 
 from hpsklearn.components import *
 #pip install git+https://github.com/hyperopt/hyperopt-sklearn 
 def optimize(X,Y,x,y, args):
-    estim = HyperoptEstimator(
-            classifier=eval(args.method)('myguy'),
-            algo=tpe.suggest,
-            max_evals = 30,
-            trial_timeout  = 120, 
-            #loss_fn = lambda a,b: (1 - f1_score(a,b)),
-            preprocessing=[],
-            ex_preprocs=[]
+    #estim = autosklearn.classification.AutoSklearnClassifier()
+    if args.method == 'any':
+        estis =  ['extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp']
+    else:
+        estis = [args.method]
+
+    estim = ASK2(
+            include_estimators = estis,
+            n_jobs = args.n_jobs,
+            metric = autosklearn.metrics.f1,
             )
     estim.fit(X,Y)
-
     score = f1_score(y,estim.predict(x) )
-    parm = str(estim.best_model()['learner'])
+    parm = str(estim.show_models())
     res = {'score': score, "param":parm}
     pprint.pprint(res)
     return res

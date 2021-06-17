@@ -13,3 +13,4 @@ def lasso(model,X,y):
     e = model.mse_path_.mean(axis=1)
     so.bins(e,minmax=False)
     so.lprint(coe) # i should make this work
+
