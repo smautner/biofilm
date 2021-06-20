@@ -3,6 +3,7 @@ import matplotlib
 matplotlib.use('module://matplotlib-sixel')
 import matplotlib.pyplot as plt
 
+import scipy.sparse as sparse
 
 from lmz import *
 
@@ -32,13 +33,15 @@ featdoc='''
 --plot bool False
 --n_jobs int 1
 
---svmparamrange float+ 0.01 .3 50
+--svmparamrange float+ 0.01 1 10
 --penalty str l1
 --varthresh float 1
 '''
 def relaxedlasso(X,Y,x,y,args):
     print("RELAXED LASSO NOT IMPLEMENTD ") # TODO 
 
+
+    
 def lasso(X,Y,x,y,args):
     model = LassoCV(n_alphas = 100,n_jobs = args.n_jobs).fit(X,Y)
     quality = abs(model.coef_)
@@ -81,20 +84,23 @@ def lassolars(X,Y,x,y,args):
     #so.lprint(res.astype(np.int64))
     return res, quality
 
-def svm(X,Y,x,y,args): 
-    clf = LinearSVC(class_weight = 'balanced', max_iter=500)
+def svm(X,Y,x,y,args, quiet = False): 
+    clf = LinearSVC(class_weight = 'balanced', max_iter=1000)
     param_dist = {"C": np.linspace(*args.svmparamrange[:2], int(args.svmparamrange[2])) ,
             'penalty':[args.penalty],'dual':[False]}
 
 
     search = GridSearchCV(clf,param_dist, n_jobs=args.n_jobs, scoring='f1', cv = 3).fit(X,Y)
     model = search.best_estimator_
-
-    print ("numft %d/%d  C %.3f score %.3f scorepath: " % 
-            ((abs(model.coef_)>0.0001 ).sum(),len(model.coef_.ravel()),model.C,f1_score(y,model.predict(x))), end='')
-
     err = search.cv_results_["mean_test_score"]
-    so.lprint(err, length = 25)
+    if not quiet:
+        print ("numft %d/%d  C %.3f score %.3f scorepath: " % 
+                ((abs(model.coef_)>0.0001 ).sum(),
+                    len(model.coef_.ravel()),
+                    model.C,f1_score(y,model.predict(x))), end='')
+
+        so.lprint(err, length = 25, minmax = True)
+        #print(f" {err.tolist()}")
 
     quality = abs(model.coef_)
     res = ( quality > 0.0001).squeeze()
@@ -124,11 +130,16 @@ def variance(X,Y,x,y,args):
         plt.plot(var)
         plt.show()
 
+    performancetest(X,Y,x,y,res)
     #print(res.astype(np.int64))
     return res, var
 
 def corr(X,Y,x,y,args):
-    cor = abs(np.array([spearmanr(X[:,column],Y)[0] for column in range(X.shape[1])]))
+    if type(X) == sparse.csr_matrix:
+        X2 = sparse.csc_matrix(X)
+        cor = abs([spearmanr(X2[:,column].todense().A1,Y)[0] for column in range(X.shape[1])])
+    else:
+        cor = abs([spearmanr(X2[:,column].todense().A1,Y)[0] for column in range(X.shape[1])])
     res, cut= autothresh(cor)
     print(f"cor  features: {sum(res)}/{len(res)} ",end ='')
     cor.sort() 
@@ -139,10 +150,13 @@ def corr(X,Y,x,y,args):
         plt.plot(cor)
         plt.show()
 
+    performancetest(X,Y,x,y, res)
     return res, cor 
 
 def all(X,Y,x,y,args):
-    return np.full(X.shape[1],1) ,  np.full(X.shape[1],1)
+    res = np.full( X.shape[1], True)
+    performancetest(X,Y,x,y,res)
+    return res,res
 
 
 
@@ -194,13 +208,53 @@ def agglocorr(X,Y,x,y,args):
         plt.show()
     return res, np.full(X.shape[1],1)
 
+def agglosvm(X,Y,x,y,args):
+    res,_ = agglocore(X,Y,x,y,args)
+    res = np.array(res) == True
+    X2 = X[:,res]
+    x2 = x[:,res]
+    
+    caccept, _ = svm(X2,Y,x2, y, args, quiet = True)
+    res[res == 1] = caccept
+    print(f"aglo+ features: {sum(res)}/{len(res)} ",end ='')
+    if args.plot:
+        plt.close()
+        plt.title(f"cut: {cut}")
+        cor.sort()
+        plt.plot(cor)
+        plt.show()
+    performancetest(X,Y,x,y,res)
+    return res, np.full(X.shape[1],1)
+
+
+
+
+
+
+
+
+
+
+
+##########################3
+#  ZE ENDO 
+########################
+
+def performancetest(X,Y,x,y,selected):
+    clf = LinearSVC(class_weight = 'balanced', max_iter=1000)
+    X = X[:,selected]
+    x = x[:,selected]
+    clf.fit(X,Y) 
+    performance =  f1_score(y, clf.predict(x))
+    print(f" performance of {X.shape[1]} features: {performance}")
 
 def main():
     args = opts.parse(featdoc)
-    XYxy = datautil.getfold()
+    XYxy, feat, inst  = datautil.getfold()
     res  = eval(args.method)(*XYxy, args) 
+    performancetest(*XYxy, res)
     #import pprint;pprint.pprint(res)
-    np.savez_compressed(args.out,*res)
+    np.savez_compressed(args.out,*res, feat[res[0]])
 
 
 if __name__ == "__main__":

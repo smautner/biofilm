@@ -30,7 +30,7 @@ def optimize(X,Y,x,y, args):
             include_preprocessors = ["no_preprocessing"],
             n_jobs = args.n_jobs,
             ensemble_size = 1, 
-            time_left_for_this_task = 600 if args.debug else 3600,
+            time_left_for_this_task = 600 if args.debug else 21600,
             metric = autosklearn.metrics.f1,
             )
     estim.fit(X,Y)

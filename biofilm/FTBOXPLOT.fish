@@ -1,36 +1,44 @@
+
 set -x 'MKL_NUM_THREADS' 1
 set -x 'NUMBA_NUM_THREADS' 1
 set -x 'OMP_NUM_THREADS' 1
 set -x 'OPENBLAS_NUM_THREADS' 1
+set -x 'NUMEXPR_MAX_THREADS' 1
 
 
+#############
+# special data loading options
+############
+
+set load  --infile pigdataframe2.pkl --loader ../examples/pigdataframe.py  \
+    --fabikernel False --pigdatasubsample $samples --pigblacklist {4} 
+
+set samples -1
+set samples 10000
+set blacklist kernel #genome no
 
 
-parallel --record-env  
+##############
+## data loading
+#############
+
+set randseeds (seq 1 1) 
+set foldselect (seq 0 (math $folds -1))
+set load2 --randinit {1} --foldselect {2} --Z True --folds 5
+
+
 
 #########################
 # feature selectors 
 #########################
 
-set ftmethods svm all corr variance agglocorr agglocore
-set blacklist kernel genome no
-set randseeds (seq 1 3) 
-set folds (seq 0 4)
-set samples 10000
-set QUICKFIT False
+set ftmethods agglosvm  #svm all corr variance agglocorr agglocore agglosvm
 
-#set randseeds (seq 1 1) 
-#set samples 1000
-#set QUICKFIT True
+set para -j 5 --joblog log.txt  python biofilm-features.py 
+set task --method {3} --out res8/{1}_{2}_{3}_{4}.ft --n_jobs 5 --penalty l1 --svmparamrange 0.1 1 5
 
 
-set para -j 32 --joblog log.txt --env _ python biofilm-features.py 
-set load  --infile pigdataframe2.pkl --randinit {1} --loader ../examples/pigdataframe.py 
-set load2 --foldselect {2} --pigdatasubsample $samples --pigblacklist {4} --Z True
-set task --method {3} --out res/{1}_{2}_{3}_{4}.ft --n_jobs 1 --penalty l1 
-
-
-parallel $para $load $load2 $task ::: $randseeds ::: $folds ::: $ftmethods ::: $blacklist
+parallel $para $load $load2 $task ::: $randseeds ::: $foldselect ::: $ftmethods ::: $blacklist
 
 
 ##########################3
@@ -38,10 +46,11 @@ parallel $para $load $load2 $task ::: $randseeds ::: $folds ::: $ftmethods ::: $
 ##########################
 
 
-set para -j 32 --joblog log2.txt --env _ python biofilm-optimize6.py 
-set task --method any --out res3/{1}_{2}_{3}_{4}.json --debug $QUICKFIT
+set para -j 2 --joblog log2.txt  python biofilm_mlp.py 
+set task --method any --out res8/{1}_{2}_{3}_{4}.json --n_jobs 1 --debug True
 
-parallel $para $load $load2 --featurefile res/{1}_{2}_{3}_{4}.ft.npz  $task ::: $randseeds ::: $folds ::: $ftmethods ::: $blacklist
+#parallel $para $load $load2 --featurefile res8/{1}_{2}_{3}_{4}.ft.npz  $task ::: $randseeds ::: $folds ::: $ftmethods ::: $blacklist
+#parallel $para $load $load2  $task ::: $randseeds ::: $foldselect ::: $ftmethods ::: $blacklist
 
 
 
@@ -54,6 +63,8 @@ function aaa
     python -c "
 import numpy as np
 import os
+import basics as ba
+
 
 def load(folder,loader):
     r= []
@@ -64,9 +75,10 @@ def load(folder,loader):
             r.append(myres)
     return r 
 
-r = load('./res', lambda x: np.load(x)['arr_0'])
-r = [di['data'] for di in r]
-print(np.mean(r))
+
+r = load('./res', ba.jloadfile)
+import pprint
+pprint.pprint(r)
 
 #import matplotlib
 #matplotlib.use('module://matplotlib-sixel')
@@ -75,5 +87,4 @@ print(np.mean(r))
 #plt.show()
 "
 end 
-
 
