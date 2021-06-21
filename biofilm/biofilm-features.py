@@ -33,7 +33,7 @@ featdoc='''
 --plot bool False
 --n_jobs int 1
 
---svmparamrange float+ 0.01 1 10
+--svmparamrange float+ -3 1.1 5 
 --penalty str l1
 --varthresh float 1
 '''
@@ -86,7 +86,7 @@ def lassolars(X,Y,x,y,args):
 
 def svm(X,Y,x,y,args, quiet = False): 
     clf = LinearSVC(class_weight = 'balanced', max_iter=1000)
-    param_dist = {"C": np.linspace(*args.svmparamrange[:2], int(args.svmparamrange[2])) ,
+    param_dist = {"C": np.logspace(*args.svmparamrange[:2], int(args.svmparamrange[2])) ,
             'penalty':[args.penalty],'dual':[False]}
 
 
