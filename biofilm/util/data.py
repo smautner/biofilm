@@ -30,7 +30,7 @@ def loadfolds(infile,loader,randinit, folds,foldselect,  subsample, Z, featurefi
     
     if not loader: 
         d = np.load(infile,allow_pickle=True)
-        X,y  = [d[f'arr_{x}'] for x in range(4)]
+        X,y  = [d[f'arr_{x}'] for x in range(2)]
         instances = np.array(Range(X.shape[0]))
         features = np.array(Range(X.shape[1]))
     else:
@@ -49,9 +49,8 @@ def loadfolds(infile,loader,randinit, folds,foldselect,  subsample, Z, featurefi
             
         else: # default list 
             ft = np.load(featurefile)['arr_0']
-            print(f" {ft.shape}")
             X=X[:,ft%2==1] # works with 0/1 and False/True
-            features=features[:,ft%2==1] # works with 0/1 and False/True
+            features=features[ft%2==1] # works with 0/1 and False/True
 
 
 
@@ -63,10 +62,8 @@ def loadfolds(infile,loader,randinit, folds,foldselect,  subsample, Z, featurefi
     if Z:
         X = StandardScaler(with_mean= type(X) != sparse.csr_matrix ).fit_transform(X )
 
+    return iterselect( kfold(X,y,n_splits = folds,randseed=randinit, feature_names = features, instance_names = instances),  foldselect)
 
-
-
-    return iterselect( kfold(X,y,n_splits = folds,randseed=randinit,), foldselect, features, instances)
 def kfold(X, y, n_splits=5, randseed=None, shuffle=True, feature_names=None, instance_names=None):
     kf = StratifiedKFold(n_splits=n_splits, shuffle=shuffle, random_state=randseed)
     for train,test in  kf.split(X, y):

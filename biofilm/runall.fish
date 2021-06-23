@@ -6,18 +6,19 @@ set -x 'OPENBLAS_NUM_THREADS' 1
 
 
 
+set folds (seq 0 4)
 
-
-set para -j 10 python biofilm-features.py 
-
-set load  --infile lncRNA.npz --randinit {1} --loader ../examples/npzloader.py
-
-set task --method svm --plot True
-
-parallel $para $load $task ::: (seq 10)
+set prog -j 10 python biofilm-features.py 
+set load  --infile lncRNA.npz  --foldselect {1} --Z True
+set task --method svm --out res/o_{1}
+#parallel $prog $load $task ::: $folds 
 
 
 
+set prog -j 5 --joblog log.txt python biofilm-optimize6.py 
+set task --method sgd --out res/oo_{1} --featurefile res/o_{1}.npz --time 120 --n_jobs 6
+
+parallel $prog $load $task ::: $folds 
 
 
 # -<< ZOMG  >>-  

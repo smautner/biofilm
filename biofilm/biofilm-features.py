@@ -33,7 +33,7 @@ featdoc='''
 --plot bool False
 --n_jobs int 1
 
---svmparamrange float+ -3 1.1 5 
+--svmparamrange float+ -3 2 5 
 --penalty str l1
 --varthresh float 1
 '''
@@ -103,7 +103,7 @@ def svm(X,Y,x,y,args, quiet = False):
         #print(f" {err.tolist()}")
 
     quality = abs(model.coef_)
-    res = ( quality > 0.0001).squeeze()
+    res = ( quality > 0.0001).ravel()#squeeze()
     #so.lprint(res.astype(np.int64))
     return res, quality
 
@@ -252,7 +252,7 @@ def main():
     args = opts.parse(featdoc)
     XYxy, feat, inst  = datautil.getfold()
     res  = eval(args.method)(*XYxy, args) 
-    performancetest(*XYxy, res)
+    performancetest(*XYxy, res[0])
     #import pprint;pprint.pprint(res)
     np.savez_compressed(args.out,*res, feat[res[0]])
 
