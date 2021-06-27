@@ -16,7 +16,18 @@ optidoc='''
 --out str jsongoeshere
 --n_jobs int 1
 --time int 3600
+--randinit int 1337  # should be the same as the one in data.py
 '''
+
+
+
+
+def get_params(ask): 
+    a  =str(ask)
+    classifier = re.findall("'classifier:__choice__': '(\w+)'",a)[0]
+    args = re.findall(f"(classifier:{classifier}:[^,]+,)",a)
+    return args
+    
 
 def optimize(X,Y,x,y, args):
     if args.method == 'any':
@@ -37,37 +48,29 @@ def optimize(X,Y,x,y, args):
     # there is only 1 model in the end -> 0, we dont care about its weight -> 1 (this is the model) 
     #print(f" asdasdasd{estim.get_models_with_weights()}")
     estimator = estim.get_models_with_weights()[0][1] 
-    return estimator # how do i get the model?
+    return estimator, get_params(estimator)
 
 
 
 
-def get_params(ask): 
-    a  =str(ask)
-    classifier = re.findall("'classifier:__choice__': '(\w+)'",a)[0]
-    args = re.findall(f"(classifier:{classifier}:[^,]+,)",a)
-    return args
-    
 
 
 def main():
 
     args = dirtyopts.parse(optidoc)
     data, fea, ins = datautil.getfold()
-    estim = optimize(*data,args)
 
+    estim,params = optimize(*data,args)
     pred  = estim.predict(data[2])
     proba = estim.predict_proba(data[2])[:,1]
     score = f1_score(data[3],pred)
-
-
 
     #####
     # CSV: instance, reallabel, prediction, proba
     #######
     with open(args.out+".csv", "w") as f:
         things = zip(ins,data[3],pred,proba)
-        things = [ f"{a}, {b}, {c}, {d}"  for a,b,c,d in things  ]
+        things = [ f"{a}, {b}, {c}, {d}, {args.randinit}"  for a,b,c,d in things  ]
         f.write('\n'.join( things ) )
         f.write('\n')
     
@@ -76,7 +79,7 @@ def main():
     # PRINT OUT
     #######
     print(f"{score=}") 
-    pprint.pprint(get_params(estim))
+    pprint.pprint(params)
 
 
     ##########
@@ -84,7 +87,7 @@ def main():
     ##########
     d={}
     d['score'] = score
-    d['modelparams'] = get_params(estim)
+    d['modelparams'] = params
     jdumpfile(d,args.out+'.model')
     
 

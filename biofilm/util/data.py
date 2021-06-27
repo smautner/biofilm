@@ -33,6 +33,7 @@ def loadfolds(infile,loader,randinit, folds,foldselect,  subsample, Z, featurefi
         X,y  = [d[f'arr_{x}'] for x in range(2)]
         instances = np.array(Range(X.shape[0]))
         features = np.array(Range(X.shape[1]))
+    
     else:
         scope = {}
         exec(open(loader,'r').read(), scope) 
