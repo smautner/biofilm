@@ -1,11 +1,11 @@
 import dirtyopts
-import json
 import biofilm.util.data as datautil
+import biofilm.util.out as out
 import numpy as np
 import structout as so
 from sklearn.metrics import  f1_score
 import pprint
-jdumpfile = lambda thing, filename:  open(filename,'w').write(json.dumps(thing))
+
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier as ASK2
 from autosklearn.classification import AutoSklearnClassifier as ASK1
 import autosklearn.metrics
@@ -17,9 +17,9 @@ optidoc='''
 --n_jobs int 1
 --time int 3600
 --randinit int 1337  # should be the same as the one in data.py
+--preprocess bool False
+#--metric str f1 assert f1 auc   TODO
 '''
-
-
 
 
 def get_params(ask): 
@@ -36,7 +36,7 @@ def optimize(X,Y,x,y, args):
         estis = [args.method]
     estim = ASK1(
             include_estimators = estis,
-            include_preprocessors = ["no_preprocessing"],
+            include_preprocessors = ["no_preprocessing"] if not args.preprocess else None,
             n_jobs = args.n_jobs,
             ensemble_size = 1, 
             time_left_for_this_task = args.time,
@@ -53,45 +53,15 @@ def optimize(X,Y,x,y, args):
 
 
 
-
-
 def main():
 
     args = dirtyopts.parse(optidoc)
     data, fea, ins = datautil.getfold()
-
     estim,params = optimize(*data,args)
-    pred  = estim.predict(data[2])
-    proba = estim.predict_proba(data[2])[:,1]
-    score = f1_score(data[3],pred)
+    out.report(estim,params, args)
 
-    #####
-    # CSV: instance, reallabel, prediction, proba
-    #######
-    with open(args.out+".csv", "w") as f:
-        things = zip(ins,data[3],pred,proba)
-        things = [ f"{a}, {b}, {c}, {d}, {args.randinit}"  for a,b,c,d in things  ]
-        f.write('\n'.join( things ) )
-        f.write('\n')
+
     
-
-    ###########
-    # PRINT OUT
-    #######
-    print(f"{score=}") 
-    pprint.pprint(params)
-
-
-    ##########
-    # MODEL PARAMS
-    ##########
-    d={}
-    d['score'] = score
-    d['modelparams'] = params
-    jdumpfile(d,args.out+'.model')
-    
-
-
 
 if __name__ == "__main__":
     main()

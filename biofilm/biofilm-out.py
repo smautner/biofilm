@@ -58,8 +58,8 @@ if not args.rawproba:
 #########
 # get avg score
 #########
-avg_score= [np.mean(x) for x in zip(scores)] if len(scores)> 1 else scores[0]
-
+#avg_score= [np.mean(x) for x in zip(scores)] if len(scores)> 1 else scores[0]
+avg_score= [np.mean(x) for x in zip(*scores)] 
 
 
 from sklearn.metrics import precision_recall_curve
@@ -73,16 +73,20 @@ plt.show()
 ###########
 if args.showproblems > 0:
     truth = np.array(truth) 
-    scores = np.array(avg_score) 
+    scores2 = np.array(avg_score) 
+    scores = np.array(scores).T
+    print('SCORESHAPE',scores.shape)
     instances = np.array(insta) 
     pmask = truth ==1 
     nmask = truth ==0
 
-    sorted_pos = np.argsort( scores[pmask] )
+    sorted_pos = np.argsort( scores2[pmask] )
     print(f"problematic pos instances:")
-    for r in [(instances[pmask][x], scores[pmask][x])  for x in sorted_pos[:args.showproblems]]:
+    for r in [(instances[pmask][x], scores2[pmask][x])  for x in sorted_pos[:args.showproblems]]:
         print(r)
-    sorted_neg = np.argsort( -scores[nmask] )
+    sorted_neg = np.argsort( -scores2[nmask] )
     print(f"problematic neg instances:")
-    for r in [(instances[nmask][x], scores[nmask][x])  for x in sorted_neg[:args.showproblems]]:
+    for r in [(instances[nmask][x], scores2[nmask][x])  for x in sorted_neg[:args.showproblems]]:
         print(r)
+
+

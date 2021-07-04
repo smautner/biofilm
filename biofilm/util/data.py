@@ -22,9 +22,13 @@ datadoc='''
 --featurecount int -1 
 '''
 
+def getargs():
+    return dirtyopts.parse(datadoc)
+
 def getfold():
     args= dirtyopts.parse(datadoc).__dict__
     return loadfolds(**args)
+
 
 def loadfolds(infile,loader,randinit, folds,foldselect,  subsample, Z, featurefile, featurecount ):
     
