@@ -26,7 +26,7 @@ def optimize(X,Y,x,y, args):
     estim = MLP( alpha = 0.00002,
                 #early_stopping = True, 
                 epsilon = 1e-8, 
-                hidden_layer_sizes =(60,60,60), 
+                hidden_layer_sizes = (90,50,10),
                 learning_rate_init = 0.0005,
                 n_iter_no_change = 32,
                 )
@@ -50,7 +50,7 @@ def main():
     args = dirtyopts.parse(optidoc)
     data, fea, ins = datautil.getfold()
     esti, param   = optimize(*data,args)
-    out.report(esti,param,args)
+    out.report(esti,param,args, quiet = True)
     
     #####
     # CSV: instance, reallabel, proba

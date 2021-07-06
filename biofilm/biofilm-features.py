@@ -36,6 +36,7 @@ featdoc='''
 --svmparamrange float+ -3 2 5 
 --penalty str l1
 --varthresh float 1
+--runsvm bool True
 '''
 def relaxedlasso(X,Y,x,y,args):
     print("RELAXED LASSO NOT IMPLEMENTD ") # TODO 
@@ -52,7 +53,6 @@ def lasso(X,Y,x,y,args):
             ( f1_score(y,model.predict(x)>cutoff), model.alpha_, (model.coef_>0.0001).sum(), len(model.coef_)), end= '')
 
     so.lprint(model.mse_path_.mean(axis = 0))
-    #so.lprint(res.astype(np.int64))
 
     return res, quality
 
@@ -66,7 +66,6 @@ def logistic(X,Y,x,y,args):
     res =  quality > 0.0001
 
     print(f"  score:{f1_score(y,model.predict(x))}  feaures: {sum(res)}/{len(res)} ")
-    #so.lprint(res.astype(np.int64))
     return res, quality
 
 def lassolars(X,Y,x,y,args):
@@ -81,7 +80,6 @@ def lassolars(X,Y,x,y,args):
     so.lprint(model.mse_path_.mean(axis = 0))
 
 
-    #so.lprint(res.astype(np.int64))
     return res, quality
 
 def svm(X,Y,x,y,args, quiet = False): 
@@ -100,11 +98,9 @@ def svm(X,Y,x,y,args, quiet = False):
                     model.C,f1_score(y,model.predict(x))), end='')
 
         so.lprint(err, length = 25, minmax = True)
-        #print(f" {err.tolist()}")
 
     quality = abs(model.coef_)
     res = ( quality > 0.0001).ravel()#squeeze()
-    #so.lprint(res.astype(np.int64))
     return res, quality
 
 def autothresh(arr, cov = 'tied'):
@@ -122,7 +118,6 @@ def variance(X,Y,x,y,args):
         res = var > args.varthresh
 
     print(f"var  features: {sum(res)}/{len(res)} ",end =' ')
-    #so.lprint(res.astype(np.int64))
     var.sort()
     so.lprint(var, length = 50)
 
@@ -130,8 +125,6 @@ def variance(X,Y,x,y,args):
         plt.plot(var)
         plt.show()
 
-    performancetest(X,Y,x,y,res)
-    #print(res.astype(np.int64))
     return res, var
 
 def corr(X,Y,x,y,args):
@@ -150,12 +143,10 @@ def corr(X,Y,x,y,args):
         plt.plot(cor)
         plt.show()
 
-    performancetest(X,Y,x,y, res)
     return res, cor 
 
 def all(X,Y,x,y,args):
     res = np.full( X.shape[1], True)
-    performancetest(X,Y,x,y,res)
     return res,res
 
 
@@ -178,7 +169,6 @@ def agglocore(X,Y,x,y,args):
     clf = AgglomerativeClustering(distance_threshold  =  mydist)
     clf.n_clusters = None
     clf.fit(X_data)
-
     labels = clf.labels_
     uni = np.unique(labels)
     fl = []
@@ -213,7 +203,6 @@ def agglosvm(X,Y,x,y,args):
     res = np.array(res) == True
     X2 = X[:,res]
     x2 = x[:,res]
-    
     caccept, _ = svm(X2,Y,x2, y, args, quiet = True)
     res[res == 1] = caccept
     print(f"aglo+ features: {sum(res)}/{len(res)} ",end ='')
@@ -223,7 +212,6 @@ def agglosvm(X,Y,x,y,args):
         cor.sort()
         plt.plot(cor)
         plt.show()
-    performancetest(X,Y,x,y,res)
     return res, np.full(X.shape[1],1)
 
 
@@ -252,9 +240,10 @@ def main():
     args = opts.parse(featdoc)
     XYxy, feat, inst  = datautil.getfold()
     res  = eval(args.method)(*XYxy, args) 
-    performancetest(*XYxy, res[0])
+    if args.runsvm:
+        performancetest(*XYxy, res[0])
     #import pprint;pprint.pprint(res)
-    np.savez_compressed(args.out,*res, feat[res[0]])
+    np.savez_compressed(args.out, *res, feat[res[0]])
 
 
 if __name__ == "__main__":

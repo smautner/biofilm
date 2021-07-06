@@ -10,20 +10,19 @@ set -x 'NUMEXPR_MAX_THREADS' 1
 ############
 
 
-set samples 10000 #-1
-set blacklist kernel #genome no
+set samples -1
 
 set load  --infile pigdataframe2.pkl --loader ../examples/pigdataframe.py  \
-    --fabikernel False --pigdatasubsample $samples --pigblacklist {4} 
+    --fabikernel True  --pigblacklist kernel
 
 ##############
 ## data loading
 #############
 
 set folds 10
-set randseeds (seq 1 5) 
+set randseeds (seq 1 1) 
 set foldselect (seq 0 (math $folds -1))
-set load2 --randinit {1} --foldselect {2} --Z True --folds $folds
+set load2 --randinit {1} --foldselect {2} --folds $folds
 
 
 
@@ -31,13 +30,13 @@ set load2 --randinit {1} --foldselect {2} --Z True --folds $folds
 # feature selectors 
 #########################
 
-set ftmethods all  #svm all corr variance agglocorr agglocore agglosvm
+set ftmethods all #svm all corr variance agglocorr agglocore agglosvm
 
-set para -j 32 --joblog log.txt  python biofilm-features.py 
-set task --method {3} --out res/{1}_{2}_{3}_{4}.ft --n_jobs 1 --penalty l1 --svmparamrange 0.1 1 5
+set para -j 32 --joblog log.txt  python biofilm-features.py  --Z False
+set task --method {3} --out res/{1}_{2}_{3}.ft --n_jobs 1 --runsvm True --penalty l2 --svmparamrange 1 1 1
 
 
-parallel $para $load $load2 $task ::: $randseeds ::: $foldselect ::: $ftmethods ::: $blacklist
+parallel $para $load $load2 $task ::: $randseeds ::: $foldselect ::: $ftmethods  
 
 
 ##########################3
@@ -46,10 +45,10 @@ parallel $para $load $load2 $task ::: $randseeds ::: $foldselect ::: $ftmethods 
 
 
 set para -j 32 --joblog log2.txt  python biofilm_mlp.py 
-set task --method any --out res/{1}_{2}_{3}_{4}.json --n_jobs 1 --debug True
+set task --method any --out res/{1}_{2}_{3}.json --n_jobs 1 --debug True
 
 #parallel $para $load $load2 --featurefile res/{1}_{2}_{3}_{4}.ft.npz  $task ::: $randseeds ::: $folds ::: $ftmethods ::: $blacklist
-parallel $para $load $load2  $task ::: $randseeds ::: $foldselect ::: $ftmethods ::: $blacklist
+#parallel $para $load $load2  $task ::: $randseeds ::: $foldselect ::: $ftmethods ::: $blacklist
 
 
 

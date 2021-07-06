@@ -42,13 +42,14 @@ def read(filename):
             print(f" you can not subsample the fabi stack yet .. exiting")
             exit()
         
-        return load_npz("/home/ubuntu/repos/biofilm/biofilm/VECTORS.npz"), y 
+        #return load_npz("/home/ubuntu/repos/biofilm/biofilm/VECTORS.npz"), y 
+        return load_npz("/home/ubuntu/repos/WEINBERG/SMALLVECS.npz"), y , list(range(2**16)), names
           
     p.pop("GENOMEOVERLAP")
     p.pop("KERNELNEIGH")
     X = p.to_numpy()
     # now we load subsample and so on
-    features = p.index[1:]
+    features = p.columns[1:]
     return X[:,1:],y,features,names  # somehow dataframes attach an index so we jump one
 
 

@@ -5,7 +5,7 @@ import dirtyopts
 import numpy as np
 from lmz import *   
 import matplotlib.pyplot as plt
-
+from sklearn.metrics import  f1_score
 ##################
 # the purpose oof this is to draw a precision recall curve 
 # should also use the average rank of an instance  as a threshold if multiple seeds were used
@@ -15,6 +15,7 @@ doc = '''
 --infiles str+ ''
 --rawproba bool False
 --showproblems int 0
+--drawAll bool False
 '''
 
 args = dirtyopts.parse(doc)
@@ -31,7 +32,7 @@ for e in args.infiles:
         if len(line) < 4: 
             continue
         instance, truth, pred, score, seed  = line.split(',')
-        seeds[int(seed)].append( [float(score), int(truth), instance])
+        seeds[int(seed)].append( [float(score), int(truth), instance, int(pred) ])
 
 
 
@@ -41,11 +42,13 @@ for e in args.infiles:
 y = []
 scores = []
 insta = instance
+predictions = [] 
 for sti_list  in seeds.values(): 
     sti_list.sort(key=lambda x: x[2] )
-    score, truth, instance = Transpose(sti_list)
+    score, truth, instance, prediction = Transpose(sti_list)
     y= truth
     insta = instance
+    predictions.append(prediction)
     scores.append(score)
 
 ####
@@ -61,11 +64,19 @@ if not args.rawproba:
 #avg_score= [np.mean(x) for x in zip(scores)] if len(scores)> 1 else scores[0]
 avg_score= [np.mean(x) for x in zip(*scores)] 
 
-
 from sklearn.metrics import precision_recall_curve
 precision, recall, thresholds = precision_recall_curve( truth, avg_score)
+plt.plot(recall, precision, label=f"mean {'score' if args.rawproba else 'rank'} ({len(scores)} repeats)")
+plt.xlabel("recall")
+plt.ylabel("precision")
+plt.title(f'score: {np.mean([f1_score(truth,x) for x in predictions])} instances: {len(truth)}')
 
-plt.plot(recall, precision)
+if args.drawAll: 
+    for s in scores:
+        precision, recall, thresholds = precision_recall_curve( truth, s)
+        plt.plot(recall, precision)
+
+plt.legend()
 plt.show()
 
 ###########
@@ -89,4 +100,12 @@ if args.showproblems > 0:
     for r in [(instances[nmask][x], scores2[nmask][x])  for x in sorted_neg[:args.showproblems]]:
         print(r)
 
+    plt.close()
+    plt.hist(scores2[pmask], bins = 100)
+    plt.title('positive')
+    plt.show()
+    plt.close()
+    plt.title('negative')
+    plt.hist(scores2[nmask], bins = 100)
+    plt.show()
 

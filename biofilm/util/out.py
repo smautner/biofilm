@@ -7,7 +7,7 @@ from sklearn.metrics import  f1_score
 import biofilm.util.data as datautil
 
 
-def report(estim, params, args):
+def report(estim, params, args, quiet = False):
     data, fea, ins = datautil.getfold()
     dataargs = datautil.getargs()
 
@@ -28,8 +28,9 @@ def report(estim, params, args):
     ###########
     # PRINT OUT
     #######
-    print(f"{score=}") 
-    pprint.pprint(params)
+    if not quiet:
+        print(f"{score=}") 
+        pprint.pprint(params)
 
     ##########
     # MODEL PARAMS
