@@ -243,7 +243,11 @@ def main():
     if args.runsvm:
         performancetest(*XYxy, res[0])
     #import pprint;pprint.pprint(res)
-    np.savez_compressed(args.out, *res, feat[res[0]])
+
+    def np_bool_select(numpi, bools):
+        return np.array([x for x,y in zip(numpi,bools) if y  ])
+
+    np.savez_compressed(args.out, *res, np_bool_select(feat,res[0]))
 
 
 if __name__ == "__main__":

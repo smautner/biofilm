@@ -30,13 +30,13 @@ set load2 --randinit {1} --foldselect {2} --folds $folds
 # feature selectors 
 #########################
 
-set ftmethods all #svm all corr variance agglocorr agglocore agglosvm
+set ftmethods svm #svm all corr variance agglocorr agglocore agglosvm
 
-set para -j 32 --joblog log.txt  python biofilm-features.py  --Z False
-set task --method {3} --out res/{1}_{2}_{3}.ft --n_jobs 1 --runsvm True --penalty l2 --svmparamrange 1 1 1
+set para -j 32 --joblog log.txt  python biofilm-features.py  --Z False 
+set task --method {3} --out res/{1}_{2}_{3}.ft --n_jobs 2 --runsvm False --penalty l2 --svmparamrange -3 2 10
 
 
-parallel $para $load $load2 $task ::: $randseeds ::: $foldselect ::: $ftmethods  
+#parallel $para $load $load2 $task ::: $randseeds ::: $foldselect ::: $ftmethods  
 
 
 ##########################3
@@ -44,11 +44,11 @@ parallel $para $load $load2 $task ::: $randseeds ::: $foldselect ::: $ftmethods
 ##########################
 
 
-set para -j 32 --joblog log2.txt  python biofilm_mlp.py 
+set para -j 32 --joblog log2.txt  python biofilm_fabimlp.py  --Z False
 set task --method any --out res/{1}_{2}_{3}.json --n_jobs 1 --debug True
 
 #parallel $para $load $load2 --featurefile res/{1}_{2}_{3}_{4}.ft.npz  $task ::: $randseeds ::: $folds ::: $ftmethods ::: $blacklist
-#parallel $para $load $load2  $task ::: $randseeds ::: $foldselect ::: $ftmethods ::: $blacklist
+parallel $para $load $load2  $task ::: $randseeds ::: $foldselect ::: $ftmethods 
 
 
 
