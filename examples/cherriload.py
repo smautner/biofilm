@@ -3,7 +3,7 @@ import eden.graph as eg
 import networkx as nx
 import numpy as np
 from collections import defaultdict
-from scipy.sparse import csr_matrix, hstack
+from scipy.sparse import csr_matrix, hstack, load_npz, save_npz
 partner =  {a:b for a,b in zip("({[<",")}]>")  }
 
 
@@ -28,13 +28,12 @@ def mkgraph(sequence, structure):
     #return eg.vectorize([graph], discrete = False) # keep here in case i want nested edges ...
 
 
-def read(filename):
-    d1 = cri.loadDF(filename+'test_con300_neg.csv')
-    d2 = cri.loadDF(filename+"test_con300_pos.csv")
+def convert(negname, posname, outname):
+    d1 = cri.loadDF(negname)
+    d2 = cri.loadDF(posname)
 
     # making y is easy
     y = np.array([0]*len(d1)+[1]*len(d2))
-
 
     # convert the dataframes, deleting the 'object' dtypes as they are strings ...
     X = np.vstack(( d1.to_numpy(), d2.to_numpy()))
@@ -49,13 +48,25 @@ def read(filename):
     #print(d1['subseqDP'])
     #print(d1['hybridDP'])
 
-    X= hstack((X,X2))
+    X= csr_matrix(hstack((X,X2)))
+    save_npz(outname+'.X.csr',X)
+    np.savez(outname+'.y.npz',y)
     return X,y
 
-###
 
+def read(name):
+    X = load_npz(name+".X.csr.npz")
+    y = np.load(name + '.y.npz',allow_pickle=True)['arr_0']
+    #y = np.load(name + '.y.npz',allow_pickle=True).reshape((-1,1))
+    #print(f" {X.shape} {y.shape}")
+    return X,y,np.array(range(X.shape[0])), np.array(range(X.shape[1]))
 
-if __name__ == "__main__":
+def makedata():
     p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/test_context_feat/"
-    x,p =  read(p)
-    np.savez('eeeh.npz',(x,p))
+    d1 = p+'test_con300_neg.csv'
+    d2 = p+"test_con300_pos.csv"
+    convert(d1,d2,'cherry')
+
+
+#X,y,_,sd = read('cherry')
+

@@ -26,30 +26,41 @@ from statsmodels.stats.outliers_influence import variance_inflation_factor
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import Perceptron, SGDClassifier
-featdoc=''' 
+from sklearn.ensemble import RandomForestClassifier
+
+featdoc='''
 # options for feature selection:
---method str lasso  svm all corr variance logistic relaxedlasso  VarianceInflation aggloclust
+--method str svm  svm all corr variance logistic relaxedlasso  VarianceInflation aggloclust forest
 --out str numpycompressdumpgoeshere
 --plot bool False
 --n_jobs int 1
 
---svmparamrange float+ -3 2 5 
+--svmparamrange float+ -3 2 5
 --penalty str l1
 --varthresh float 1
 --runsvm bool True
 '''
 def relaxedlasso(X,Y,x,y,args):
-    print("RELAXED LASSO NOT IMPLEMENTD ") # TODO 
+    print("RELAXED LASSO NOT IMPLEMENTD ") # TODO
 
 
-    
+
+def forest(X,Y,x,y,args):
+    model = RandomForestClassifier(class_weight='balanced', random_state = 0).fit(X,Y)
+    quality = model.feature_importances_
+    res =  autothresh(quality)[0]
+    trainscore   = f1_score(Y, model.predict(X))
+    testscore   = f1_score(y, model.predict(x))
+    print(f" {trainscore=:.2f} {testscore=:.2f}")
+    return res, quality
+
 def lasso(X,Y,x,y,args):
     model = LassoCV(n_alphas = 100,n_jobs = args.n_jobs).fit(X,Y)
     quality = abs(model.coef_)
     res =  quality > 0.0001
 
     testscore, cutoff = max([(f1_score(Y,model.predict(X) > t),t) for t in np.arange(.3,.7,.001)])
-    print ('score: %.2f alpha: %.4f  features: %d/%d  ERRORPATH: ' % 
+    print ('score: %.2f alpha: %.4f  features: %d/%d  ERRORPATH: ' %
             ( f1_score(y,model.predict(x)>cutoff), model.alpha_, (model.coef_>0.0001).sum(), len(model.coef_)), end= '')
 
     so.lprint(model.mse_path_.mean(axis = 0))
@@ -57,9 +68,9 @@ def lasso(X,Y,x,y,args):
     return res, quality
 
 def logistic(X,Y,x,y,args):
-    model = LogisticRegressionCV(Cs=10, 
-                        penalty = args.penalty, 
-                        max_iter = 300, 
+    model = LogisticRegressionCV(Cs=10,
+                        penalty = args.penalty,
+                        max_iter = 300,
                         solver ='liblinear',
                         n_jobs = args.n_jobs).fit(X,Y)
     quality = abs(model.coef_.ravel())
@@ -82,7 +93,7 @@ def lassolars(X,Y,x,y,args):
 
     return res, quality
 
-def svm(X,Y,x,y,args, quiet = False): 
+def svm(X,Y,x,y,args, quiet = False):
     clf = LinearSVC(class_weight = 'balanced', max_iter=1000)
     param_dist = {"C": np.logspace(*args.svmparamrange[:2], int(args.svmparamrange[2])) ,
             'penalty':[args.penalty],'dual':[False]}
@@ -92,12 +103,13 @@ def svm(X,Y,x,y,args, quiet = False):
     model = search.best_estimator_
     err = search.cv_results_["mean_test_score"]
     if not quiet:
-        print ("numft %d/%d  C %.3f score %.3f scorepath: " % 
+        print ("numft %d/%d  C %.3f score %.3f scorepath: " %
                 ((abs(model.coef_)>0.0001 ).sum(),
                     len(model.coef_.ravel()),
                     model.C,f1_score(y,model.predict(x))), end='')
 
-        so.lprint(err, length = 25, minmax = True)
+        #so.lprint(err, length = 25, minmax = True)
+        so.lprint(err)
 
     quality = abs(model.coef_)
     res = ( quality > 0.0001).ravel()#squeeze()
@@ -112,7 +124,7 @@ def autothresh(arr, cov = 'tied'):
 
 def variance(X,Y,x,y,args):
     var = np.var(X, axis = 0)
-    if args.varthresh <= 0: 
+    if args.varthresh <= 0:
         res = (autothresh(var)[0])
     else:
         res = var > args.varthresh
@@ -135,15 +147,15 @@ def corr(X,Y,x,y,args):
         cor = abs([spearmanr(X2[:,column].todense().A1,Y)[0] for column in range(X.shape[1])])
     res, cut= autothresh(cor)
     print(f"cor  features: {sum(res)}/{len(res)} ",end ='')
-    cor.sort() 
-    so.lprint(cor, length = 50)    
+    cor.sort()
+    so.lprint(cor, length = 50)
 
     if args.plot:
         plt.title(f"cut: {cut}")
         plt.plot(cor)
         plt.show()
 
-    return res, cor 
+    return res, cor
 
 def all(X,Y,x,y,args):
     res = np.full( X.shape[1], True)
@@ -152,10 +164,10 @@ def all(X,Y,x,y,args):
 
 
 def agglocore(X,Y,x,y,args):
-    clf = AgglomerativeClustering(n_clusters = 100,compute_distances=True) 
+    clf = AgglomerativeClustering(n_clusters = 100,compute_distances=True)
     X_data = np.transpose(X)
     clf.fit(X_data)
-    
+
     numft = X.shape[1]
     dists = np.array([a for a,(b,c) in zip(clf.distances_, clf.children_) if b < c < numft])
     _, mydist = autothresh(dists,'tied')
@@ -177,7 +189,7 @@ def agglocore(X,Y,x,y,args):
         erm = [np.abs(spearmanr(Y, X[:,f])[0]) for f in clusterinstances]
         zzz = np.full(len(erm), 0 )
         zzz[np.argmax(erm)]  = 1
-        fl.append(zzz) 
+        fl.append(zzz)
     res = np.hstack(fl)
 
     print(f"agloc features: {sum(res)}/{len(res)} ",end ='')
@@ -225,21 +237,21 @@ def agglosvm(X,Y,x,y,args):
 
 
 ##########################3
-#  ZE ENDO 
+#  ZE ENDO
 ########################
 
 def performancetest(X,Y,x,y,selected):
     clf = LinearSVC(class_weight = 'balanced', max_iter=1000)
     X = X[:,selected]
     x = x[:,selected]
-    clf.fit(X,Y) 
+    clf.fit(X,Y)
     performance =  f1_score(y, clf.predict(x))
     print(f" performance of {X.shape[1]} features: {performance}")
 
 def main():
     args = opts.parse(featdoc)
     XYxy, feat, inst  = datautil.getfold()
-    res  = eval(args.method)(*XYxy, args) 
+    res  = eval(args.method)(*XYxy, args)
     if args.runsvm:
         performancetest(*XYxy, res[0])
     #import pprint;pprint.pprint(res)
