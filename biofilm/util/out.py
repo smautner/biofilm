@@ -21,15 +21,16 @@ def report(estim, params, args, quiet = False):
     with open(args.out+".csv", "w") as f:
         things = zip(ins,data[3],pred,proba)
         things = [ f"{a}, {b}, {c}, {d}, {dataargs.randinit}"  for a,b,c,d in things  ]
+        things = ['instance_id, true_label, predicted_label, instance_score, rand_init'] + things
         f.write('\n'.join( things ) )
         f.write('\n')
-    
+
 
     ###########
     # PRINT OUT
     #######
     if not quiet:
-        print(f"{score=}") 
+        print(f"{score=}")
         pprint.pprint(params)
 
     ##########
