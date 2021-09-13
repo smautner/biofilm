@@ -3,66 +3,72 @@ import matplotlib
 matplotlib.use('module://matplotlib-sixel')
 import dirtyopts
 import numpy as np
-from lmz import *   
+from lmz import *
 import matplotlib.pyplot as plt
 from sklearn.metrics import  f1_score
 ##################
-# the purpose oof this is to draw a precision recall curve 
+# the purpose oof this is to draw a precision recall curve
 # should also use the average rank of an instance  as a threshold if multiple seeds were used
 #################
 
 doc = '''
---infiles str+ ''
---rawproba bool False
---showproblems int 0
---drawAll bool False
+--infiles str+ ''      all the csv files
+--rawproba bool True   alternatively use the rank of the instance, this might help normalization
+--showproblems int 0   output the instances where the method performs worst
+--drawAll bool False   if multiple scores were collected per instance, we can display each run seperately
 '''
 
 args = dirtyopts.parse(doc)
 
 
 
-##########
-# READ ALL THE DATA
-#########
+'''
+READ THE DATA
+seed -> [[score, tru, instance_name, prediction]]
+'''
 from collections import defaultdict
 seeds = defaultdict(list)
-for e in args.infiles: 
-    for line in open(e,'r').read().split('\n'):
-        if len(line) < 4: 
+for e in args.infiles:
+    for line in open(e,'r').read().split('\n')[1:]:
+        if len(line) < 4:
             continue
         instance, truth, pred, score, seed  = line.split(',')
         seeds[int(seed)].append( [float(score), int(truth), instance, int(pred) ])
 
 
 
-############3
-# get truth and scores  for each instance
-############
+'''
+vor each seed list:
+    sort it by instance
+    -> y and instance name are the same at each iteration
+    -> predictions and scores change with each seed so we make a matrix
+'''
 y = []
 scores = []
 insta = instance
-predictions = [] 
-for sti_list  in seeds.values(): 
+predictions = []
+for sti_list  in seeds.values():
     sti_list.sort(key=lambda x: x[2] )
     score, truth, instance, prediction = Transpose(sti_list)
-    y= truth
+    y = truth
     insta = instance
     predictions.append(prediction)
     scores.append(score)
 
-####
-# rank transform
-####
+
+
+'''
+transform predicted probabilities (in case we dont want to trust them)
+then calculate the average score per instance
+'''
 if not args.rawproba:
     scores = [ np.argsort(np.argsort(s))   for s in scores ]
-
-
-#########
-# get avg score
-#########
 #avg_score= [np.mean(x) for x in zip(scores)] if len(scores)> 1 else scores[0]
-avg_score= [np.mean(x) for x in zip(*scores)] 
+avg_score = [np.mean(x) for x in zip(*scores)]
+
+
+
+
 
 from sklearn.metrics import precision_recall_curve
 precision, recall, thresholds = precision_recall_curve( truth, avg_score)
@@ -71,7 +77,7 @@ plt.xlabel("recall")
 plt.ylabel("precision")
 plt.title(f'score: {np.mean([f1_score(truth,x) for x in predictions])} instances: {len(truth)}')
 
-if args.drawAll: 
+if args.drawAll:
     for s in scores:
         precision, recall, thresholds = precision_recall_curve( truth, s)
         plt.plot(recall, precision)
@@ -79,16 +85,20 @@ if args.drawAll:
 plt.legend()
 plt.show()
 
-###########
-# get probalmatic instances
-###########
+
+
+'''
+we had a case where data was hand-classified, we wanted to identify the instances
+where a) the ML method has issues or b) the human made a mistake
+therefore we identify the most problematic missclassified instances
+'''
 if args.showproblems > 0:
-    truth = np.array(truth) 
-    scores2 = np.array(avg_score) 
+    truth = np.array(truth)
+    scores2 = np.array(avg_score)
     scores = np.array(scores).T
     print('SCORESHAPE',scores.shape)
-    instances = np.array(insta) 
-    pmask = truth ==1 
+    instances = np.array(insta)
+    pmask = truth ==1
     nmask = truth ==0
 
     sorted_pos = np.argsort( scores2[pmask] )
