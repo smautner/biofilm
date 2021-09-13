@@ -11,6 +11,7 @@ def mkgraph(sequence, structure):
     graph = nx.Graph()
     lifo = defaultdict(list)
     cut = structure.index("&")
+
     structure = structure.replace("&","")
     sequence = sequence.replace("&","")
     for i,(s,n) in enumerate(zip(structure, sequence)):
@@ -41,9 +42,10 @@ def convert(negname, posname, outname):
     X=csr_matrix(X.astype(np.float64))
 
     # vectorize the binding...
-    X2 = [mkgraph(seq, stru) for d in [d1,d2] for seq,stru in  zip(d['subseqDP'],d['hybridDP'])  ]
-    X2 = eg.vectorize(X2)
-
+    graphs = [mkgraph(seq, stru) for d in [d1,d2] for seq,stru in  zip(d['subseqDP'],d['hybridDP'])  ]
+    X2 = eg.vectorize(graphs)
+    # discrete True / False uses nested edges or not..
+    # do nested edges get included in the neighborhood graph?
     #print(f" {X2.shape=} {X.shape=}")
     #print(d1['subseqDP'])
     #print(d1['hybridDP'])
@@ -59,7 +61,7 @@ def read(name):
     y = np.load(name + '.y.npz',allow_pickle=True)['arr_0']
     #y = np.load(name + '.y.npz',allow_pickle=True).reshape((-1,1))
     #print(f" {X.shape} {y.shape}")
-    return X,y,np.array(range(X.shape[0])), np.array(range(X.shape[1]))
+    return X,y,np.array(range(X.shape[1])), np.array(range(X.shape[0]))
 
 def makedata():
     p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/test_context_feat/"
@@ -69,4 +71,4 @@ def makedata():
 
 
 #X,y,_,sd = read('cherry')
-
+#makedata()

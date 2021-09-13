@@ -12,7 +12,7 @@ doc = '''
 --fabikernel bool False
 '''
 
-def read(filename): 
+def read(filename):
     args = dirtyopts.parse(doc)
     p = pandas.read_pickle(filename)
     names = p.pop("NAME")
@@ -33,18 +33,18 @@ def read(filename):
         nid = rg.permuted(nid)
         nid = nid[args.pigdatasubsample:]
         p.drop(nid,inplace=True, axis = 0)
-    
-    # separate y and X 
+
+    # separate y and X
     y = p.pop("CLASS").to_numpy()
 
     if args.fabikernel:
         if args.pigdatasubsample> 0:
             print(f" you can not subsample the fabi stack yet .. exiting")
             exit()
-        
-        #return load_npz("/home/ubuntu/repos/biofilm/biofilm/VECTORS.npz"), y 
+
+        #return load_npz("/home/ubuntu/repos/biofilm/biofilm/VECTORS.npz"), y
         return load_npz("/home/ubuntu/repos/WEINBERG/SMALLVECS.npz"), y , list(range(2**16)), names
-          
+
     p.pop("GENOMEOVERLAP")
     p.pop("KERNELNEIGH")
     X = p.to_numpy()

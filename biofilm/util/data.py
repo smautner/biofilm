@@ -43,13 +43,13 @@ def loadfolds(infile,loader,randinit, folds,foldselect,  subsample, Z, featurefi
         exec(open(loader,'r').read(), scope)
         X,y, features, instances = scope['read'](infile)
 
+    assert X.shape[1] == len(features), f'{X.shape[1]=} {len(features)=}'
 
     if featurefile != '':
+        featurefile += '.npz'
         if featurecount > 0: # size constrained list
             ft_quality = np.load(featurefile, allow_pickle=True)['arr_1']
-
             want=np.argsort(feature_quality)[-featurecount:]
-
             X=X[:,want]
             features=features[:,want]
 
