@@ -68,7 +68,13 @@ def loadfolds(infile,loader,randinit, folds,foldselect,  subsample, Z, featurefi
     if Z:
         X = StandardScaler(with_mean= type(X) != sparse.csr_matrix ).fit_transform(X )
 
-    return iterselect( kfold(X,y,n_splits = folds,randseed=randinit, feature_names = features, instance_names = instances),  foldselect)
+    if folds > 1:
+        return iterselect(
+                kfold(X,y,n_splits = folds,randseed=randinit,
+                    feature_names = features, instance_names = instances),
+                foldselect)
+    else:
+        return X,y,features,instances
 
 def kfold(X, y, n_splits=5, randseed=None, shuffle=True, feature_names=None, instance_names=None):
     kf = StratifiedKFold(n_splits=n_splits, shuffle=shuffle, random_state=randseed)

@@ -2,14 +2,28 @@
 
 import pprint
 import json
+import dill
 jdumpfile = lambda thing, filename:  open(filename,'w').write(json.dumps(thing))
+dumpfile  = lambda thing, fn: dill.dump(thing,open(fn,'wb'))
 from sklearn.metrics import  f1_score
 import biofilm.util.data as datautil
 
+import re
+def get_params(ask):
+    a  =str(ask)
+    classifier = re.findall("'classifier:__choice__': '(\w+)'",a)[0]
+    args = re.findall(f"(classifier:{classifier}:[^,]+,)",a)
+    return args
 
-def report(estim, params, args, quiet = False):
+def report(estim, outputname, quiet = False):
+    '''
+    dumps the csv file
+    dumps the model
+    '''
     data, fea, ins = datautil.getfold()
     dataargs = datautil.getargs()
+    params = get_params(estim)
+
 
     pred  = estim.predict(data[2])
     proba = estim.predict_proba(data[2])[:,1]
@@ -18,7 +32,7 @@ def report(estim, params, args, quiet = False):
     #####
     # CSV: instance, reallabel, prediction, proba
     #######
-    with open(args.out+".csv", "w") as f:
+    with open(outputname+".csv", "w") as f:
         things = zip(ins,data[3],pred,proba)
         things = [ f"{a}, {b}, {c}, {d}, {dataargs.randinit}"  for a,b,c,d in things  ]
         things = ['instance_id, true_label, predicted_label, instance_score, rand_init'] + things
@@ -38,5 +52,6 @@ def report(estim, params, args, quiet = False):
     ##########
     d={}
     d['score'] = score
-    d['modelparams'] = params
-    jdumpfile(d,args.out+'.model')
+    d['params'] = params
+    d['estimator'] = estim
+    dumpfile(d,outputname+'.model')
