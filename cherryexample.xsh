@@ -4,12 +4,14 @@ we can do it in a fancy way, by providing a python file that has a
 read(path) function. as demonstrated in examples/cherriload.py
 '''
 
-loaddata = '--infile examples/cherry --loader examples/cherriload.py '
+loaddata = '--infile examples/2291HU --loader examples/cherriload.py '
 
 '''
 2. extract features
 '''
-if False:
+import sys
+what = sys.argv[1]
+if what=='ftselect':
     parallel -j 32 --joblog feat.log python biofilm/biofilm-features.py @(loaddata)\
         --foldselect '{1}' --method forest --out '{1}' ::: $(seq 0 4)
 
@@ -18,15 +20,15 @@ if False:
 -> outputs crossvall results in .csv files and model params in .model
 '''
 loaddata += '--featurefile {1} --foldselect {1}'
-if False:
-    parallel -j 32 --joblog feat.log python biofilm/biofilm-optimize6.py  @(loaddata)\
-        --out '{1}.optimized' --n_jobs 5 --time 120 ::: $(seq 0 4)
+if what == 'runopti':
+    parallel -j 5 --joblog feat.log python biofilm/biofilm-optimize6.py  @(loaddata)\
+        --out '{1}.optimized' --n_jobs 6 --time 36000 ::: $(seq 0 4)
 
 
 '''
 4. plot performance (so far)
 '''
-if False:
+if what == 'plot1':
     python biofilm/biofilm-out.py --infiles *.csv
 
 
@@ -40,7 +42,7 @@ if False:
     parallel -j 32 --joblog delme.log python biofilm/biofilm-cv.py  @(loaddata) --model '{2}'\
         --out '{2}_{1}.last' ::: $(seq 0 4) ::: $(ls *.model)
 
-if True:
+if False:
     import dill
     import pprint
     loadfile = lambda filename: dill.load(open(filename, 'rb'))

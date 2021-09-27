@@ -63,12 +63,18 @@ def read(name):
     #print(f" {X.shape} {y.shape}")
     return X,y,np.array(range(X.shape[1])), np.array(range(X.shape[0]))
 
-def makedata():
+def makedata_test():
     p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/test_context_feat/"
     d1 = p+'test_con300_neg.csv'
     d2 = p+"test_con300_pos.csv"
     convert(d1,d2,'cherry')
 
+def makedata2291HU():
+    p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/2291hu/"
+    d1 = p+'feature_paris_HEK293T_context_150_pos_occ_neg.csv'
+    d1 = p+'HEKT293T_neg.csv'
+    d2 = p+"feature_paris_HEK293T_context_150_pos_occ_pos.csv"
+    convert(d1,d2,'2291HU')
 
 #X,y,_,sd = read('cherry')
-#makedata()
+#makedata2291HU()
