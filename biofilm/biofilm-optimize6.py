@@ -31,6 +31,7 @@ def optimize(X,Y,x,y, args):
             include_preprocessors = ["no_preprocessing"] if not args.preprocess else None,
             n_jobs = args.n_jobs,
             ensemble_size = 1,
+            memory_limit = int(240000/30),
             time_left_for_this_task = args.time,
             metric = autosklearn.metrics.f1,
             )

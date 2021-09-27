@@ -18,11 +18,12 @@ if what=='ftselect':
 '''
 3. run optimization
 -> outputs crossvall results in .csv files and model params in .model
+!!! carefull with the memory limit, process will die without terminating...
 '''
 loaddata += '--featurefile {1} --foldselect {1}'
 if what == 'runopti':
-    parallel -j 5 --joblog feat.log python biofilm/biofilm-optimize6.py  @(loaddata)\
-        --out '{1}.optimized' --n_jobs 6 --time 36000 ::: $(seq 0 4)
+    parallel -j 5 --joblog opti.log python biofilm/biofilm-optimize6.py  @(loaddata)\
+        --out '{1}.optimized' --n_jobs 6 --time 54000 ::: $(seq 0 4)
 
 
 '''
