@@ -92,6 +92,7 @@ we had a case where data was hand-classified, we wanted to identify the instance
 where a) the ML method has issues or b) the human made a mistake
 therefore we identify the most problematic missclassified instances
 '''
+
 if args.showproblems > 0:
     truth = np.array(truth)
     scores2 = np.array(avg_score)

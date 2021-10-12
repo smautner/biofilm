@@ -3,7 +3,6 @@
 we can do it in a fancy way, by providing a python file that has a
 read(path) function. as demonstrated in examples/cherriload.py
 '''
-
 loaddata = '--infile examples/2291HU --loader examples/cherriload.py '
 
 '''
@@ -25,7 +24,6 @@ if what == 'runopti':
     parallel -j 5 --joblog opti.log python biofilm/biofilm-optimize6.py  @(loaddata)\
         --out '{1}.optimized' --n_jobs 6 --time 54000 ::: $(seq 0 4)
 
-
 '''
 4. plot performance (so far)
 '''
@@ -37,13 +35,12 @@ if what == 'plot1':
 5. do crossval for all models
       use all 5 models to crossvalidate over all instances to compare them...
 '''
-if False:
-
+if what == 'rerunCV':
     # rum models
     parallel -j 32 --joblog delme.log python biofilm/biofilm-cv.py  @(loaddata) --model '{2}'\
-        --out '{2}_{1}.last' ::: $(seq 0 4) ::: $(ls *.model)
+        --out '{2}_{1}.last' ::: $(seq 0 4) ::: $(ls *optimized.model)
 
-if False:
+if what == 'trueplot':
     import dill
     import pprint
     loadfile = lambda filename: dill.load(open(filename, 'rb'))

@@ -10,9 +10,20 @@ import biofilm.util.data as datautil
 
 import re
 def get_params(ask):
+    '''
+    this is supposed to work, however
+    '''
     a  =str(ask)
     classifier = re.findall("'classifier:__choice__': '(\w+)'",a)[0]
     args = re.findall(f"(classifier:{classifier}:[^,]+,)",a)
+    return args
+
+def get_params2(ask):
+    '''
+    this should actually find the sklearn classifier and get the paramns
+    '''
+    args=str(ask.steps[-1][1].choice.__dict__)
+
     return args
 
 def report(estim, outputname, quiet = False):
@@ -22,7 +33,7 @@ def report(estim, outputname, quiet = False):
     '''
     data, fea, ins = datautil.getfold()
     dataargs = datautil.getargs()
-    params = get_params(estim)
+    params = get_params2(estim)
 
 
     pred  = estim.predict(data[2])

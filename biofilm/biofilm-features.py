@@ -48,6 +48,7 @@ def relaxedlasso(X,Y,x,y,args):
 def forest(X,Y,x,y,args):
     model = RandomForestClassifier(class_weight='balanced', random_state = 0).fit(X,Y)
     quality = model.feature_importances_
+    so.lprint(quality)
     res =  autothresh(quality)[0]
     trainscore   = f1_score(Y, model.predict(X))
     testscore   = f1_score(y, model.predict(x))
@@ -116,7 +117,7 @@ def svm(X,Y,x,y,args, quiet = False):
     return res, quality
 
 def autothresh(arr, cov = 'tied'):
-    arr=abs(arr)
+    arr=np.abs(arr)
     cpy = np.array(arr)
     cpy.sort()
     rr = ubergauss.between_gaussians(cpy, covariance_type = cov)
@@ -141,14 +142,20 @@ def variance(X,Y,x,y,args):
 
 def corr(X,Y,x,y,args):
     if type(X) == sparse.csr_matrix:
-        X2 = sparse.csc_matrix(X)
-        cor = abs([spearmanr(X2[:,column].todense().A1,Y)[0] for column in range(X.shape[1])])
+        #X2 = sparse.csc_matrix(X)
+        X2 = X.todense().T
+        def spr(x):
+            res = abs(spearmanr(x.A1,Y)[0])
+            return 0 if np.isnan(res) else res
+        cor = np.array([spr(x) for x in X2])
     else:
+        # todo ...THIS DEFINITELY FAILS BUT I DONT WANT TO FIX IT  NOW
         cor = abs([spearmanr(X2[:,column].todense().A1,Y)[0] for column in range(X.shape[1])])
+
     res, cut= autothresh(cor)
     print(f"cor  features: {sum(res)}/{len(res)} ",end ='')
     cor.sort()
-    so.lprint(cor, length = 50)
+    so.lprint(cor)
 
     if args.plot:
         plt.title(f"cut: {cut}")
@@ -251,6 +258,7 @@ def performancetest(X,Y,x,y,selected):
 def main():
     args = opts.parse(featdoc)
     XYxy, feat, inst  = datautil.getfold()
+
     res  = eval(args.method)(*XYxy, args)
     if args.runsvm:
         performancetest(*XYxy, res[0])
