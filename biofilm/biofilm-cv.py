@@ -12,8 +12,8 @@ optidoc='''
 loadfile = lambda filename: dill.load(open(filename, 'rb'))
 dumpfile  = lambda thing, fn: dill.dump(thing,open(fn,'wb'))
 
+
 def fit(X,Y,x,y, args):
-    print(f"{ args=}")
     model = loadfile(args.model)['estimator']
     model.fit(X,Y)
     return model

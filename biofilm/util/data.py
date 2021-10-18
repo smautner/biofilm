@@ -8,7 +8,7 @@ import scipy.sparse as sparse
 datadoc='''
 # theese are the options for reading data
 --infile str myNumpyDump
---loader str  # optional path to a python file that introduces a load function
+--loader str loaderfile # optional path to a python file that introduces a load function
 
 
 --randinit int 1337
@@ -31,7 +31,7 @@ def getfold():
     return loadfolds(**args)
 
 
-def loadfolds(infile,loader,randinit, folds,foldselect,  subsample, Z, featurefile, featurecount ):
+def loadfolds(infile=None,loader=None,randinit=None, folds=None,foldselect=None, subsample=None, Z=None, featurefile=None, featurecount=None):
 
     if not loader:
         d = np.load(infile,allow_pickle=True)

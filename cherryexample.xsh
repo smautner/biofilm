@@ -57,12 +57,13 @@ if what == 'trueplot':
             pprint.pprint(d['params'])
 
 if what == 'refit':
-    loaddata += ' --folds 0'
-    parallel python biofilm/biofilm-cv.py  @(loaddata) --model ./bigcherry/3.optimized.model \
-        --out 'UBERMODEL' ::: 3
+    python biofilm/biofilm-cv.py  --folds 0 --featurefile bigcherry/3 \
+        --infile examples/2291HU --loader examples/cherriload.py \
+        --model bigcherry/3.optimized.model --out 'UBERMODELF'
 
 if what == 'mouseeval':
-    loadmouse = '--infile examples/1923MO --loader examples/cherriload.py --folds 0 --featurefile bigcherry/3'
-    python biofilm/util/out.py --model UBERMODEL.model --out MOUSEOUT @(loadmouse)
+    python biofilm/util/out.py --model UBERMODEL.model --out MOUSEOUT\
+        --infile examples/1923MO --loader examples/cherriload.py\
+        --folds 0 --featurefile bigcherry/3
     python biofilm/biofilm-out.py --infiles "MOUSEOUT.csv"
 
