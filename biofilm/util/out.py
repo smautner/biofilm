@@ -7,7 +7,7 @@ import dill
 
 jdumpfile = lambda thing, filename:  open(filename,'w').write(json.dumps(thing))
 dumpfile  = lambda thing, fn: dill.dump(thing,open(fn,'wb'))
-
+loadfile = lambda filename: dill.load(open(filename, 'rb'))
 
 import re
 def get_params(ask):
@@ -64,3 +64,16 @@ def report(estim, outputname, quiet=False):
     d['params'] = params
     d['estimator'] = estim
     dumpfile(d, outputname+'.model')
+
+
+optidoc='''
+--out str outname
+--model str inputmodel
+'''
+import dirtyopts
+args = dirtyopts.parse(optidoc)
+
+if __name__ == "__main__":
+    mod = loadfile(args.model)
+    report(mod, args.out)
+

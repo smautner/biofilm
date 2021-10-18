@@ -40,11 +40,11 @@ if what == 'rerunCV':
     parallel -j 32 --joblog delme.log python biofilm/biofilm-cv.py  @(loaddata) --model '{2}'\
         --out '{2}_{1}.last' ::: $(seq 0 4) ::: $(ls bigcherry/*optimized.model)
 
+import dill
+loadfile = lambda filename: dill.load(open(filename, 'rb'))
 if what == 'trueplot':
-    import dill
     import pprint
     import glob
-    loadfile = lambda filename: dill.load(open(filename, 'rb'))
     for i in range(0,4):
         search = f'bigcherry/{i}*last.csv'
         filez=glob.glob(search)
@@ -56,4 +56,13 @@ if what == 'trueplot':
             print("PARAMETERS")
             pprint.pprint(d['params'])
 
+if what == 'refit':
+    loaddata += ' --folds 0'
+    parallel python biofilm/biofilm-cv.py  @(loaddata) --model ./bigcherry/3.optimized.model \
+        --out 'UBERMODEL' ::: 3
+
+if what == 'mouseeval':
+    loadmouse = '--infile examples/1923MO --loader examples/cherriload.py --folds 0 --featurefile bigcherry/3'
+    python biofilm/util/out.py --model UBERMODEL.model --out MOUSEOUT @(loadmouse)
+    python biofilm/biofilm-out.py --infiles "MOUSEOUT.csv"
 
