@@ -38,7 +38,9 @@ featdoc='''
 --svmparamrange float+ -3 2 5
 --penalty str l1
 --varthresh float 1
+
 --runsvm bool True
+--showtop int 0
 '''
 def relaxedlasso(X,Y,x,y,args):
     print("RELAXED LASSO NOT IMPLEMENTD ") # TODO
@@ -48,7 +50,6 @@ def relaxedlasso(X,Y,x,y,args):
 def forest(X,Y,x,y,args):
     model = RandomForestClassifier(class_weight='balanced', random_state = 0).fit(X,Y)
     quality = model.feature_importances_
-    so.lprint(quality)
     res =  autothresh(quality)[0]
     trainscore   = f1_score(Y, model.predict(X))
     testscore   = f1_score(y, model.predict(x))
@@ -154,12 +155,12 @@ def corr(X,Y,x,y,args):
 
     res, cut= autothresh(cor)
     print(f"cor  features: {sum(res)}/{len(res)} ",end ='')
-    cor.sort()
     so.lprint(cor)
 
     if args.plot:
+        c2=np.sort(cor)
         plt.title(f"cut: {cut}")
-        plt.plot(cor)
+        plt.plot(c2)
         plt.show()
 
     return res, cor
@@ -225,12 +226,6 @@ def agglosvm(X,Y,x,y,args):
     caccept, _ = svm(X2,Y,x2, y, args, quiet = True)
     res[res == 1] = caccept
     print(f"aglo+ features: {sum(res)}/{len(res)} ",end ='')
-    if args.plot:
-        plt.close()
-        plt.title(f"cut: {cut}")
-        cor.sort()
-        plt.plot(cor)
-        plt.show()
     return res, np.full(X.shape[1],1)
 
 
@@ -247,13 +242,14 @@ def agglosvm(X,Y,x,y,args):
 #  ZE ENDO
 ########################
 
-def performancetest(X,Y,x,y,selected):
+def performancetest(X,Y,x,y,selected, scores):
     clf = LinearSVC(class_weight = 'balanced', max_iter=1000)
     X = X[:,selected]
     x = x[:,selected]
     clf.fit(X,Y)
     performance =  f1_score(y, clf.predict(x))
-    print(f" performance of {X.shape[1]} features: {performance}")
+    print(f" performance of {X.shape[1]} features: {performance:.3f} \
+            {so.intlistV2.doALine(np.sort(scores),characterlimit=50)}")
 
 def main():
     args = opts.parse(featdoc)
@@ -261,13 +257,19 @@ def main():
 
     res  = eval(args.method)(*XYxy, args)
     if args.runsvm:
-        performancetest(*XYxy, res[0])
+        performancetest(*XYxy, res[0], res[1])
     #import pprint;pprint.pprint(res)
 
     def np_bool_select(numpi, bools):
         return np.array([x for x,y in zip(numpi,bools) if y  ])
 
     np.savez_compressed(args.out, *res, np_bool_select(feat,res[0]))
+
+
+    bestft = [(score,name) for good,score,name in zip(res[0],res[1],feat) if good]
+    bestft.sort(reverse=True)
+    for scor, name in bestft[:args.showtop]:
+        print(f"{name}: {scor}")
 
 
 if __name__ == "__main__":

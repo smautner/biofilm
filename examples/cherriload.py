@@ -5,7 +5,9 @@ import numpy as np
 from collections import defaultdict
 from scipy.sparse import csr_matrix, hstack, load_npz, save_npz
 partner =  {a:b for a,b in zip("({[<",")}]>")  }
-
+import basics as ba
+from lmz import *
+import pandas as pd
 
 def mkgraph(sequence, structure):
     graph = nx.Graph()
@@ -29,9 +31,12 @@ def mkgraph(sequence, structure):
     #return eg.vectorize([graph], discrete = False) # keep here in case i want nested edges ...
 
 
-def convert(negname, posname, outname):
-    d1 = cri.loadDF(negname)
-    d2 = cri.loadDF(posname)
+def convert(negname, posname, outname, graphfeatures=True):
+    # d1 = cri.loadDF(negname)
+    # d2 = cri.loadDF(posname)
+    d1 = pd.read_csv(negname)
+    d2 = pd.read_csv(posname)
+
 
     # making y is easy
     y = np.array([0]*len(d1)+[1]*len(d2))
@@ -41,16 +46,15 @@ def convert(negname, posname, outname):
     X = X[:,d1.dtypes != 'object']
     X=csr_matrix(X.astype(np.float64))
 
-    # vectorize the binding...
-    graphs = [mkgraph(seq, stru) for d in [d1,d2] for seq,stru in  zip(d['subseqDP'],d['hybridDP'])  ]
-    X2 = eg.vectorize(graphs)
-    # discrete True / False uses nested edges or not..
-    # do nested edges get included in the neighborhood graph?
-    #print(f" {X2.shape=} {X.shape=}")
-    #print(d1['subseqDP'])
-    #print(d1['hybridDP'])
+    ba.dumpfile([name for name,ok in zip(d1.columns.tolist(), d1.dtypes) if ok != 'object'],outname+'.index.dmp')
 
-    X= csr_matrix(hstack((X,X2)))
+
+
+    if graphfeatures:
+        graphs = [mkgraph(seq, stru) for d in [d1,d2] for seq,stru in  zip(d['subseqDP'],d['hybridDP'])  ]
+        X2 = eg.vectorize(graphs)
+        X= csr_matrix(hstack((X,X2)))
+
     save_npz(outname+'.X.csr',X)
     np.savez(outname+'.y.npz',y)
     return X,y
@@ -61,7 +65,23 @@ def read(name):
     y = np.load(name + '.y.npz',allow_pickle=True)['arr_0']
     #y = np.load(name + '.y.npz',allow_pickle=True).reshape((-1,1))
     #print(f" {X.shape} {y.shape}")
-    return X,y,np.array(range(X.shape[1])), np.array(range(X.shape[0]))
+
+    namez = ba.loadfile(name+'.index.dmp')
+    return X,y, namez + Range(X.shape[1] - len(namez)), np.array(range(X.shape[0]))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def makedata_test():
     p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/test_context_feat/"
@@ -69,12 +89,41 @@ def makedata_test():
     d2 = p+"test_con300_pos.csv"
     convert(d1,d2,'cherry')
 
-def makedata2291HU():
+def makedata2291HU_garbage_cheat_data():
     p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/2291hu/"
     d1 = p+'feature_paris_HEK293T_context_150_pos_occ_neg.csv'
     d1 = p+'HEKT293T_neg.csv'
     d2 = p+"feature_paris_HEK293T_context_150_pos_occ_pos.csv"
-    convert(d1,d2,'2291HU')
+    convert(d1,d2,'2291HUNOGR', graphfeatures=False)
+
+def makedata2291HU():
+    p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/2291hu/feature_filtered_paris_HEK293T_context_150_pos_occ_"
+    d1 = p+'neg.csv'
+    d2 = p+"pos.csv"
+    convert(d1,d2,'2291HU', graphfeatures=True)
+
+def makedata2291HUNOG():
+    # there is inf in the DATA
+    # sed -i '/inf/d' feature_filtered_paris_HEK293T_context_150_pos_occ_neg.csv
+    p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/2291hu/feature_filtered_paris_HEK293T_context_150_pos_occ_"
+    d1 = p+'neg.csv'
+    d2 = p+"pos.csv"
+    convert(d1,d2,'2291HUNOG', graphfeatures=False)
+
+def makedata1923MO():
+    p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/mouse1923/feature_paris_mouse_context_150_pos_occ_"
+    d1 = p+'neg.csv'
+    d2 = p+"pos.csv"
+    convert(d1,d2,'1923MO', graphfeatures=True)
+
+def makedata1923MONOG():
+    # there is inf in the DATA
+    # sed -i '/inf/d' feature_filtered_paris_HEK293T_context_150_pos_occ_neg.csv
+    p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/mouse1923/feature_paris_mouse_context_150_pos_occ_"
+    d1 = p+'neg.csv'
+    d2 = p+"pos.csv"
+    convert(d1,d2,'1923MONOG', graphfeatures=False)
+
 
 #X,y,_,sd = read('cherry')
 #makedata2291HU()

@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.utils import resample
 from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
-from lmz import *
+from lmz import iterselect, Range
 import scipy.sparse as sparse
 datadoc='''
 # theese are the options for reading data
@@ -21,6 +21,7 @@ datadoc='''
 --featurefile str
 --featurecount int -1
 '''
+
 
 def getargs():
     return dirtyopts.parse(datadoc)
@@ -49,14 +50,14 @@ def loadfolds(infile,loader,randinit, folds,foldselect,  subsample, Z, featurefi
         featurefile += '.npz'
         if featurecount > 0: # size constrained list
             ft_quality = np.load(featurefile, allow_pickle=True)['arr_1']
-            want=np.argsort(feature_quality)[-featurecount:]
+            want=np.argsort(ft_quality)[-featurecount:]
             X=X[:,want]
             features=features[:,want]
 
         else: # default list
             ft = np.load(featurefile)['arr_0']
             X=X[:,ft%2==1] # works with 0/1 and False/True
-            features=features[ft%2==1] # works with 0/1 and False/True
+            features=[ f for f, ok in zip(features,ft%2==1) if ok]
 
 
 
@@ -69,7 +70,7 @@ def loadfolds(infile,loader,randinit, folds,foldselect,  subsample, Z, featurefi
         X = StandardScaler(with_mean= type(X) != sparse.csr_matrix ).fit_transform(X )
 
     if folds > 1:
-        return iterselect(
+        return terselect(
                 kfold(X,y,n_splits = folds,randseed=randinit,
                     feature_names = features, instance_names = instances),
                 foldselect)

@@ -1,12 +1,13 @@
 
-
+from sklearn.metrics import f1_score
+import biofilm.util.data as datautil
 import pprint
 import json
 import dill
+
 jdumpfile = lambda thing, filename:  open(filename,'w').write(json.dumps(thing))
 dumpfile  = lambda thing, fn: dill.dump(thing,open(fn,'wb'))
-from sklearn.metrics import  f1_score
-import biofilm.util.data as datautil
+
 
 import re
 def get_params(ask):
@@ -26,7 +27,7 @@ def get_params2(ask):
 
     return args
 
-def report(estim, outputname, quiet = False):
+def report(estim, outputname, quiet=False):
     '''
     dumps the csv file
     dumps the model
@@ -34,8 +35,6 @@ def report(estim, outputname, quiet = False):
     data, fea, ins = datautil.getfold()
     dataargs = datautil.getargs()
     params = get_params2(estim)
-
-
     pred  = estim.predict(data[2])
     proba = estim.predict_proba(data[2])[:,1]
     score = f1_score(data[3],pred)
@@ -50,7 +49,6 @@ def report(estim, outputname, quiet = False):
         f.write('\n'.join( things ) )
         f.write('\n')
 
-
     ###########
     # PRINT OUT
     #######
@@ -61,8 +59,8 @@ def report(estim, outputname, quiet = False):
     ##########
     # MODEL PARAMS
     ##########
-    d={}
+    d = {}
     d['score'] = score
     d['params'] = params
     d['estimator'] = estim
-    dumpfile(d,outputname+'.model')
+    dumpfile(d, outputname+'.model')

@@ -1,11 +1,10 @@
-
-import matplotlib
-matplotlib.use('module://matplotlib-sixel')
 import dirtyopts
 import numpy as np
 from lmz import *
+from sklearn.metrics import f1_score
+import matplotlib
+matplotlib.use('module://matplotlib-sixel')
 import matplotlib.pyplot as plt
-from sklearn.metrics import  f1_score
 ##################
 # the purpose oof this is to draw a precision recall curve
 # should also use the average rank of an instance  as a threshold if multiple seeds were used
@@ -43,14 +42,13 @@ vor each seed list:
     -> y and instance name are the same at each iteration
     -> predictions and scores change with each seed so we make a matrix
 '''
-y = []
 scores = []
 insta = instance
 predictions = []
 for sti_list  in seeds.values():
     sti_list.sort(key=lambda x: x[2] )
     score, truth, instance, prediction = Transpose(sti_list)
-    y = truth
+    # truth variable will live on :)
     insta = instance
     predictions.append(prediction)
     scores.append(score)
@@ -62,7 +60,7 @@ transform predicted probabilities (in case we dont want to trust them)
 then calculate the average score per instance
 '''
 if not args.rawproba:
-    scores = [ np.argsort(np.argsort(s))   for s in scores ]
+    scores = [ np.argsort(np.argsort(s)) for s in scores ]
 #avg_score= [np.mean(x) for x in zip(scores)] if len(scores)> 1 else scores[0]
 avg_score = [np.mean(x) for x in zip(*scores)]
 
@@ -96,8 +94,9 @@ therefore we identify the most problematic missclassified instances
 if args.showproblems > 0:
     truth = np.array(truth)
     scores2 = np.array(avg_score)
-    scores = np.array(scores).T
-    print('SCORESHAPE',scores.shape)
+
+    scoresT = np.array(scores).T
+    print('SCORESHAPE',scoresT.shape)
     instances = np.array(insta)
     pmask = truth ==1
     nmask = truth ==0
