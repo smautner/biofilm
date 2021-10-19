@@ -30,6 +30,8 @@ def mkgraph(sequence, structure):
     return graph
     #return eg.vectorize([graph], discrete = False) # keep here in case i want nested edges ...
 
+def mkgr(x):
+    return mkgraph(*x)
 
 def convert(negname, posname, outname, graphfeatures=True):
     # d1 = cri.loadDF(negname)
@@ -49,9 +51,9 @@ def convert(negname, posname, outname, graphfeatures=True):
     ba.dumpfile([name for name,ok in zip(d1.columns.tolist(), d1.dtypes) if ok != 'object'],outname+'.index.dmp')
 
 
-
     if graphfeatures:
         graphs = [mkgraph(seq, stru) for d in [d1,d2] for seq,stru in  zip(d['subseqDP'],d['hybridDP'])  ]
+        #graphs = ba.mpmap(mkgr,  [a  for d in [d1,d2] for a in  zip(d['subseqDP'],d['hybridDP'])])
         X2 = eg.vectorize(graphs)
         X= csr_matrix(hstack((X,X2)))
 
@@ -111,7 +113,7 @@ def makedata2291HUNOG():
     convert(d1,d2,'2291HUNOG', graphfeatures=False)
 
 def makedata1923MO():
-    p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/mouse1923/feature_paris_mouse_context_150_pos_occ_"
+    p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/mouse1923/feature_filtered_paris_mouse_context_150_pos_occ_"
     d1 = p+'neg.csv'
     d2 = p+"pos.csv"
     convert(d1,d2,'1923MO', graphfeatures=True)
@@ -119,7 +121,7 @@ def makedata1923MO():
 def makedata1923MONOG():
     # there is inf in the DATA
     # sed -i '/inf/d' feature_filtered_paris_HEK293T_context_150_pos_occ_neg.csv
-    p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/mouse1923/feature_paris_mouse_context_150_pos_occ_"
+    p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/mouse1923/feature_filtered_paris_mouse_context_150_pos_occ_"
     d1 = p+'neg.csv'
     d2 = p+"pos.csv"
     convert(d1,d2,'1923MONOG', graphfeatures=False)

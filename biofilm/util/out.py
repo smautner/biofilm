@@ -27,7 +27,7 @@ def get_params2(ask):
 
     return args
 
-def report(estim, outputname, quiet=False):
+def report(estim, outputname, quiet=False, predict_train=False):
     '''
     dumps the csv file
     dumps the model
@@ -35,15 +35,22 @@ def report(estim, outputname, quiet=False):
     data, fea, ins = datautil.getfold()
     dataargs = datautil.getargs()
     params = get_params2(estim)
-    pred  = estim.predict(data[2])
-    proba = estim.predict_proba(data[2])[:,1]
-    score = f1_score(data[3],pred)
+    if predict_train:
+        X = data[0]
+        y = data[1]
+    else:
+        X = data[2]
+        y= data[3]
+
+    pred  = estim.predict(X)
+    proba = estim.predict_proba(X)[:,1]
+    score = f1_score(y,pred)
 
     #####
     # CSV: instance, reallabel, prediction, proba
     #######
     with open(outputname+".csv", "w") as f:
-        things = zip(ins,data[3],pred,proba)
+        things = zip(ins,y,pred,proba)
         things = [ f"{a}, {b}, {c}, {d}, {dataargs.randinit}"  for a,b,c,d in things  ]
         things = ['instance_id, true_label, predicted_label, instance_score, rand_init'] + things
         f.write('\n'.join( things ) )
@@ -69,11 +76,12 @@ def report(estim, outputname, quiet=False):
 optidoc='''
 --out str outname
 --model str inputmodel
+--predict_train bool False
 '''
 import dirtyopts
 args = dirtyopts.parse(optidoc)
 
 if __name__ == "__main__":
     mod = loadfile(args.model)
-    report(mod, args.out)
+    report(mod, args.out,predict_train = args.predict_train )
 

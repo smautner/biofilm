@@ -59,11 +59,13 @@ if what == 'trueplot':
 if what == 'refit':
     python biofilm/biofilm-cv.py  --folds 0 --featurefile bigcherry/3 \
         --infile examples/2291HU --loader examples/cherriload.py \
-        --model bigcherry/3.optimized.model --out 'UBERMODELF'
+        --model bigcherry/3.optimized.model --out 'UBERMODEL'
 
 if what == 'mouseeval':
     python biofilm/util/out.py --model UBERMODEL.model --out MOUSEOUT\
         --infile examples/1923MO --loader examples/cherriload.py\
-        --folds 0 --featurefile bigcherry/3
+        --folds 0 --featurefile bigcherry/3 --predict_train True
+
+if what ==  'mousedraw':
     python biofilm/biofilm-out.py --infiles "MOUSEOUT.csv"
 
