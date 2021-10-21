@@ -7,6 +7,12 @@ loaddata = '--infile examples/2291HUNOG --loader examples/cherriload.py '
 
 import sys
 what =  sys.argv[1]
+
+if what == 'inspectft':
+
+    python biofilm/biofilm-features.py --infile examples/2291HUNOG --subsample 1000 --loader examples/cherriload.py\
+        --method agglocorr
+
 if what == 'runopti':
     parallel -j 5 --joblog opti.log python biofilm/biofilm-optimize6.py  @(loaddata)\
         --out 'NOG/{1}.optimized' --n_jobs 6 --time 72000 ::: $(seq 0 4)

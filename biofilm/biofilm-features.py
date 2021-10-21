@@ -2,12 +2,8 @@ import dirtyopts as opts
 import matplotlib
 matplotlib.use('module://matplotlib-sixel')
 import matplotlib.pyplot as plt
-
 import scipy.sparse as sparse
-
 from lmz import *
-
-import biofilm.util.data as datautil
 import numpy as np
 from sklearn.linear_model import SGDClassifier as sgd, LassoCV, LassoLarsCV, LinearRegression
 from sklearn.svm import LinearSVC
@@ -27,6 +23,8 @@ from sklearn.cluster import AgglomerativeClustering
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import Perceptron, SGDClassifier
 from sklearn.ensemble import RandomForestClassifier
+from biofilm import util
+
 
 featdoc='''
 # options for feature selection:
@@ -170,10 +168,11 @@ def all(X,Y,x,y,args):
     return res,res
 
 
-
 def agglocore(X,Y,x,y,args):
-    clf = AgglomerativeClustering(n_clusters = 100,compute_distances=True)
-    X_data = np.transpose(X)
+    clf = AgglomerativeClustering(n_clusters = min(100,X.shape[1]) ,compute_distances=True)
+
+    X_data = np.transpose(util.zehidense(X))
+
     clf.fit(X_data)
 
     numft = X.shape[1]
@@ -206,6 +205,7 @@ def agglocore(X,Y,x,y,args):
 
 def agglocorr(X,Y,x,y,args):
     res,_ = agglocore(X,Y,x,y,args)
+    X=X.todense()
     cor = abs(np.array([spearmanr(X[:,column],Y)[0] for column in [i for i,e in enumerate(res) if e ]]))
     caccept, cut = autothresh(cor, cov = 'full')
     res[res == 1] = caccept
@@ -253,7 +253,7 @@ def performancetest(X,Y,x,y,selected, scores):
 
 def main():
     args = opts.parse(featdoc)
-    XYxy, feat, inst  = datautil.getfold()
+    XYxy, feat, inst  = util.getfold()
 
     res  = eval(args.method)(*XYxy, args)
     if args.runsvm:

@@ -1,11 +1,9 @@
 import dirtyopts
-import biofilm.util.data as datautil
-import biofilm.util.out as out
 import numpy as np
 import structout as so
 from sklearn.metrics import  f1_score
 import pprint
-
+from biofilm import util
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier as ASK2
 from autosklearn.classification import AutoSklearnClassifier as ASK1
 import autosklearn.metrics
@@ -55,10 +53,10 @@ def optimize(X,Y,x,y, args):
 
 def main():
     args = dirtyopts.parse(optidoc)
-    data, fea, ins = datautil.getfold()
+    data, fea, ins = util.getfold()
     estim, all = optimize(*data,args)
-    out.report(estim, args.out)
-    out.dumpfile(all,f"{args.out}.all.dmp")
+    util.report(estim, args.out)
+    util.dumpfile(all,f"{args.out}.all.dmp")
 
 
 
