@@ -22,13 +22,16 @@ optidoc='''
 
 
 def optimize(X,Y,x,y, args):
+
     if args.method == 'any':
         estis =  ['extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp']
     else:
         estis = [args.method]
+
+
+    #include_estimators = estis,
+    #include_preprocessors = ["no_preprocessing"] if not args.preprocess else None,
     estim = ASK1(
-            include_estimators = estis,
-            include_preprocessors = ["no_preprocessing"] if not args.preprocess else None,
             n_jobs = args.n_jobs,
             ensemble_size = 1,
             memory_limit = int(240000/30),
@@ -45,7 +48,7 @@ def optimize(X,Y,x,y, args):
     #print('estim',estim.get_params(deep=True))
     #print('estimator:',estimator.get_params(deep=True))
 
-    return pipeline
+    return pipeline, estim
 
 
 
@@ -53,8 +56,9 @@ def optimize(X,Y,x,y, args):
 def main():
     args = dirtyopts.parse(optidoc)
     data, fea, ins = datautil.getfold()
-    estim = optimize(*data,args)
+    estim, all = optimize(*data,args)
     out.report(estim, args.out)
+    out.dumpfile(all,f"{args.out}.all.dmp")
 
 
 

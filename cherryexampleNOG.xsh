@@ -12,6 +12,11 @@ if what == 'runopti':
         --out 'NOG/{1}.optimized' --n_jobs 6 --time 72000 ::: $(seq 0 4)
 
 
+if what == 'runoptimouse':
+    loaddata = '--infile examples/1923MONOG --loader examples/cherriload.py '
+    parallel -j 5 --joblog opti.log python biofilm/biofilm-optimize6.py  @(loaddata)\
+        --out 'NOGMOUSE/{1}.optimized' --n_jobs 6 --time 36000 ::: $(seq 0 4)
+
 '''
 4. plot performance (so far)
 '''
@@ -57,3 +62,8 @@ if what == 'mouseeval':
 if what ==  'mousedraw':
     python biofilm/biofilm-out.py --infiles "MOUSEOUTNOG.csv"
 
+
+if what == 'fitmouse':
+    python biofilm/biofilm-cv.py  --folds 0\
+        --infile examples/1923MONOG --loader examples/cherriload.py \
+        --model NOG/2.optimized.model --out 'NOGMOUSE'
