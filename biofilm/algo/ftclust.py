@@ -58,8 +58,8 @@ def ft(x,y):
     print(f"{ xt.shape=}")
     nc = Range(2,int(np.sqrt(xt.shape[0])),3)
     nc = Range(2,100,5)
-    #clusterings = [GaussianMixture(n_components=i).fit_predict(xt) for i in nc ]
-    clusterings = ba.mpmap(cluster,[(n,xt) for n in nc], poolsize = 20)
+    clusterings = [GaussianMixture(n_components=i,n_init =10).fit_predict(xt) for i in nc ]
+    #clusterings = ba.mpmap(cluster,[(n,xt) for n in nc], poolsize = 20)
     print(f"{ xt.shape=}")
 
     # each nc gets the average of the maxcorrPerCluster

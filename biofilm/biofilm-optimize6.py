@@ -61,9 +61,11 @@ def main():
     args = dirtyopts.parse(optidoc)
     data, fea, ins = util.getfold()
     estim, all = optimize(*data,args)
-    util.report(estim, args.out)
-    util.dumpfile(all,f"{args.out}.all.dmp")
+    scorehistory =  np.nan_to_num(all.performance_over_time_['single_best_optimization_score'].to_numpy(),nan=0.0)
 
+    util.report(estim, args.out, additionaloutput={'scorehistory': scorehistory})
+
+    so.lprint(scorehistory)
 
 
 

@@ -24,7 +24,7 @@ def get_params2(ask):
 
     return args
 
-def report(estim, outputname, quiet=False, predict_train=False):
+def report(estim, outputname, quiet=False, predict_train=False,additionaloutput={}):
     '''
     dumps the csv file
     dumps the model
@@ -67,6 +67,7 @@ def report(estim, outputname, quiet=False, predict_train=False):
     d['score'] = score
     d['params'] = params
     d['estimator'] = estim
+    d.update(additionaloutput)
     util.dumpfile(d, outputname+'.model')
 
 
