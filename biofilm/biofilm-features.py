@@ -24,6 +24,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import Perceptron, SGDClassifier
 from sklearn.ensemble import RandomForestClassifier
 from biofilm import util
+from biofilm import algo
 
 
 featdoc='''
@@ -46,13 +47,13 @@ def relaxedlasso(X,Y,x,y,args):
 
 
 def forest(X,Y,x,y,args):
-    model = RandomForestClassifier(class_weight='balanced', random_state = 0).fit(X,Y)
-    quality = model.feature_importances_
-    res =  autothresh(quality)[0]
+    scores, model = algo.forest.forest(class_weight='balanced', random_state = 0)
+    res =  autothresh(scores)[0]
+    # TODO I THINK I SHOULD RERAIN>>> or just use the default linear model...
     trainscore   = f1_score(Y, model.predict(X))
     testscore   = f1_score(y, model.predict(x))
     print(f" {trainscore=:.2f} {testscore=:.2f}")
-    return res, quality
+    return res, scores
 
 def lasso(X,Y,x,y,args):
     model = LassoCV(n_alphas = 100,n_jobs = args.n_jobs).fit(X,Y)
@@ -168,14 +169,16 @@ def all(X,Y,x,y,args):
     return res,res
 
 
+from biofilm.algo import ftclust
 def agglocore(X,Y,x,y,args):
-    clf = AgglomerativeClustering(n_clusters = min(100,X.shape[1]) ,compute_distances=True)
+    ftclust.ft(X,Y)
 
+    # fit agglo
+    numft = X.shape[1]
+    clf = AgglomerativeClustering(n_clusters = min(100,numft) ,compute_distances=True)
     X_data = np.transpose(util.zehidense(X))
-
     clf.fit(X_data)
 
-    numft = X.shape[1]
     dists = np.array([a for a,(b,c) in zip(clf.distances_, clf.children_) if b < c < numft])
     _, mydist = autothresh(dists,'tied')
 

@@ -22,7 +22,8 @@ def main():
     args = dirtyopts.parse(optidoc)
     data, fea, ins = datautil.getfold()
     estim = fit(*data,args)
-    if len(data[2])==0:
+
+    if data[2].shape[0]==0:
         print('there is no test set so we just dump the model')
         dumpfile( estim ,args.out+'.model')
     else:

@@ -75,7 +75,7 @@ def loadfolds(infile=None,loader=None,randinit=None, folds=None,foldselect=None,
                     feature_names = features, instance_names = instances),
                 foldselect)
     else:
-        return (X,y,[],[]),features,instances
+        return (X,y,np.array([]),np.array([])),features,instances
 
 def kfold(X, y, n_splits=5, randseed=None, shuffle=True, feature_names=None, instance_names=None):
     kf = StratifiedKFold(n_splits=n_splits, shuffle=shuffle, random_state=randseed)
