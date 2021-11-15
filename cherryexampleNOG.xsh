@@ -22,6 +22,10 @@ loaddata = loaddata.split()
 
 
 
+
+'''
+feature inspector is still bein built
+'''
 if what == 'inspectft':
     python biofilm/biofilm-features.py --infile examples/1923MONOG --subsample 10000\
          --loader examples/cherriload.py --method agglocorr
@@ -37,6 +41,10 @@ if what == 'runopti':
     parallel -j 5 --joblog opti.log $(which python) biofilm/biofilm-optimize6.py  @(loaddata)\
         --out @(folder+'/{1}.optimized') --n_jobs 6 --time 36000 ::: $(seq 0 4)
 
+if what == 'runopti2':
+    loaddata += '--folds 0'.split()
+    python biofilm/biofilm-optimize6.py  @(loaddata)\
+        --out @(folder+'/optimized') --n_jobs 30 --time 1800
 
 '''
 4. plot performance (so far)
@@ -53,20 +61,45 @@ if what == 'plot1':
 if what == 'rerunCV':
         # rum models
         loaddata += '--foldselect {1}'.split()
-        parallel -j 32 --joblog delme.log $(which python) biofilm/biofilm-cv.py  @(loaddata) --model '{2}'\
-            --out '{2}_{1}.last' ::: $(seq 0 4) ::: $(ls @(folder)/*optimized.model)
+        parallel -j 5 --joblog delme.log $(which python) biofilm/biofilm-cv.py\
+            @(loaddata) --model '{2}' --out '{2}_{1}.last'\
+            ::: $(seq 0 4) ::: $(ls @(folder)/*optimized.model)
+
+if what == 'rerunCV2':
+        # rum models
+        loaddata += '--foldselect {1}'.split()
+        parallel -j 5 --joblog delme.log $(which python) biofilm/biofilm-cv.py\
+            @(loaddata) --model @(folder)/optimized.model --out '{1}.lastcv2'\
+            ::: $(seq 0 4)
+
+
+if what == "crossspec":
+    # after runopti2 and reruncv2 we have all the models we need
+    #  .lastcv2 files have the CV data... so we need the rest
+    for model in ["NOGHUMAN2","NOG","NOGMOUSE"]:
+        if model != who:
+            python biofilm/biofilm-cv.py --folds 0 @(loaddata)\
+            --model @(model)/optimized.model --out @(f'CROSS_{model}_{who}')
+
 
 if what == 'trueplot':
+    import matplotlib
+    matplotlib.use('module://matplotlib-sixel')
+    import matplotlib.pyplot as plt
     import dill
     import pprint
     loadfile = lambda filename: dill.load(open(filename, 'rb'))
     for i in range(0,5):
+        print(f"########### {i} ############")
         filez =  glob(f'{folder}/{i}*.last.csv')
         python biofilm/biofilm-out.py --infiles @(filez)
-        d = loadfile(filez[0].split("_")[0])
+        d = loadfile(filez[0].split("_")[0]) # will load the model file
         print("self-score: ",d['score'])
         print("PARAMETERS")
         pprint.pprint(d['params'])
+        if 'scorehistory' in d:
+            plt.plot(d['scorehistory'])
+            plt.show(); plt.close()
 
 
 if what == 'finalmodel':

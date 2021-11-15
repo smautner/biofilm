@@ -256,8 +256,6 @@ def main():
 
     #ftclust.ft(XYxy[0],XYxy[1], feat) TODO something to inspect features?? ftclust does that but only when cout low..
 
-
-
     res  = eval(args.method)(*XYxy, args)
     if args.runsvm:
         performancetest(*XYxy, res[0], res[1])

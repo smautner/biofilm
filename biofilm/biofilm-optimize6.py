@@ -30,9 +30,9 @@ def optimize(X,Y,x,y, args):
     #include_estimators = estis,
     #include_preprocessors = ["no_preprocessing"] if not args.preprocess else None,
     include = {}
-    if args.preprocess:
-            include['feature_preprocessors'] =  ["no_preprocessing"]
-
+    if not args.preprocess:
+            include['feature_preprocessor'] =  ["no_preprocessing"]
+            #include['data_preprocessor']     =  ['NoPreprocessing']
 
     estim = ASK1(
             n_jobs = args.n_jobs,
@@ -40,7 +40,7 @@ def optimize(X,Y,x,y, args):
             include = include,
             memory_limit = int(240000/30),
             time_left_for_this_task = args.time,
-            metric = autosklearn.metrics.f1,
+            metric = autosklearn.metrics.f1
             )
     estim.fit(X,Y)
     #import code
