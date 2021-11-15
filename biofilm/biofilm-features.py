@@ -1,15 +1,13 @@
+from lmz import Map,Zip,Filter,Grouper,Range,Transpose
 import dirtyopts as opts
 import matplotlib
 matplotlib.use('module://matplotlib-sixel')
 import matplotlib.pyplot as plt
 import scipy.sparse as sparse
-from lmz import *
 import numpy as np
 from sklearn.linear_model import SGDClassifier as sgd, LassoCV, LassoLarsCV, LinearRegression
 from sklearn.svm import LinearSVC
 from sklearn.metrics import f1_score
-from sklearn.experimental import enable_halving_search_cv
-from sklearn.model_selection import HalvingGridSearchCV
 from sklearn.model_selection import GridSearchCV
 import structout as so
 import random
@@ -18,13 +16,13 @@ import ubergauss
 from scipy.stats import spearmanr
 import biofilm.util.draw as draw
 from sklearn.linear_model import LogisticRegressionCV
-from statsmodels.stats.outliers_influence import variance_inflation_factor
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import Perceptron, SGDClassifier
 from sklearn.ensemble import RandomForestClassifier
 from biofilm import util
 from biofilm import algo
+from biofilm.algo import ftclust
 
 
 featdoc='''
@@ -169,9 +167,7 @@ def all(X,Y,x,y,args):
     return res,res
 
 
-from biofilm.algo import ftclust
 def agglocore(X,Y,x,y,args):
-    ftclust.ft(X,Y)
 
     # fit agglo
     numft = X.shape[1]
@@ -257,6 +253,10 @@ def performancetest(X,Y,x,y,selected, scores):
 def main():
     args = opts.parse(featdoc)
     XYxy, feat, inst  = util.getfold()
+
+    #ftclust.ft(XYxy[0],XYxy[1], feat) TODO something to inspect features?? ftclust does that but only when cout low..
+
+
 
     res  = eval(args.method)(*XYxy, args)
     if args.runsvm:

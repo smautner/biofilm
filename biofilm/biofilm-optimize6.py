@@ -47,6 +47,7 @@ def optimize(X,Y,x,y, args):
     #code.interact(local=dict(globals(), **locals()))
     # there is only 1 model in the end -> 0, we dont care about its weight -> 1 (this is the model)
     #print(f" asdasdasd{estim.get_models_with_weights()}")
+    # models with weights is a list of model in the ensemble: [(weight_1, model_1), …, (weight_n, model_n)]
     pipeline = estim.get_models_with_weights()[0][1]
 
     #print('estim',estim.get_params(deep=True))
@@ -62,9 +63,7 @@ def main():
     data, fea, ins = util.getfold()
     estim, all = optimize(*data,args)
     scorehistory =  np.nan_to_num(all.performance_over_time_['single_best_optimization_score'].to_numpy(),nan=0.0)
-
-    util.report(estim, args.out, additionaloutput={'scorehistory': scorehistory})
-
+    util.report(estim, args.out, additionaloutput={'scorehistory': scorehistory , 'performancelog': all.performance_over_time_})
     so.lprint(scorehistory)
 
 

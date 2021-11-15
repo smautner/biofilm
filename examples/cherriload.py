@@ -126,6 +126,15 @@ def makedata1923MONOG():
     d2 = p+"pos.csv"
     convert(d1,d2,'1923MONOG', graphfeatures=False)
 
+def makedataHUMANRBPNOG():
+    # there is inf in the DATA
+    # sed -i '/inf/d' feature_filtered_paris_HEK293T_context_150_pos_occ_neg.csv
+    p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/humanRBP/"
+    d1 = p+'neg.csv'
+    d2 = p+"pos.csv"
+    convert(d1,d2,'HUMANRBPNOG', graphfeatures=False)
+
+
 
 #X,y,_,sd = read('cherry')
 #makedata2291HU()
