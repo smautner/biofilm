@@ -27,6 +27,7 @@ loaddata = loaddata.split()
 feature inspector is still bein built
 '''
 if what == 'inspectft':
+    # in biofilm-features ftclust aufrufen um da wieder einzusteigen..
     python biofilm/biofilm-features.py --infile examples/1923MONOG --subsample 10000\
          --loader examples/cherriload.py --method agglocorr
 
@@ -44,7 +45,7 @@ if what == 'runopti':
 if what == 'runopti2':
     loaddata += '--folds 0'.split()
     python biofilm/biofilm-optimize6.py  @(loaddata)\
-        --out @(folder+'/optimized') --n_jobs 30 --time 1800
+        --out @(folder+'/optimized') --n_jobs 30 --time 10800
 
 '''
 4. plot performance (so far)
@@ -69,7 +70,7 @@ if what == 'rerunCV2':
         # rum models
         loaddata += '--foldselect {1}'.split()
         parallel -j 5 --joblog delme.log $(which python) biofilm/biofilm-cv.py\
-            @(loaddata) --model @(folder)/optimized.model --out '{1}.lastcv2'\
+            @(loaddata) --model @(folder)/optimized.model --out @(who)'{1}.lastcv2'\
             ::: $(seq 0 4)
 
 
@@ -78,8 +79,10 @@ if what == "crossspec":
     #  .lastcv2 files have the CV data... so we need the rest
     for model in ["NOGHUMAN2","NOG","NOGMOUSE"]:
         if model != who:
-            python biofilm/biofilm-cv.py --folds 0 @(loaddata)\
+            python biofilm/util/out.py --folds 0 @(loaddata)\
             --model @(model)/optimized.model --out @(f'CROSS_{model}_{who}')
+
+
 
 
 if what == 'trueplot':

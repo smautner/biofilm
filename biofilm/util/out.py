@@ -20,8 +20,8 @@ def get_params2(ask):
     '''
     this should actually find the sklearn classifier and get the paramns
     '''
+    #ask = ask.get_models_with_weights()[0][1]
     args=str(ask.steps[-1][1].choice.__dict__)
-
     return args
 
 def report(estim, outputname, quiet=False, predict_train=False,additionaloutput={}):
@@ -32,7 +32,7 @@ def report(estim, outputname, quiet=False, predict_train=False,additionaloutput=
     data, fea, ins = datautil.getfold()
     dataargs = datautil.getargs()
     params = get_params2(estim)
-    if predict_train:
+    if predict_train or data[2].shape[0] ==0:
         X = data[0]
         y = data[1]
     else:
@@ -81,5 +81,7 @@ args = dirtyopts.parse(optidoc)
 
 if __name__ == "__main__":
     mod = util.loadfile(args.model)
-    report(mod, args.out,predict_train = args.predict_train )
+    #print(mod)
+
+    report(mod['estimator'], args.out,predict_train = args.predict_train )
 

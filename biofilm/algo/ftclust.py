@@ -10,8 +10,8 @@ from umap import UMAP
 import seaborn as sns
 from biofilm.algo import forest
 import pandas as pd
-
-
+from biofilm.util import draw
+import networkx as nx
 
 
 __doc__ = '''
@@ -42,12 +42,24 @@ def ft(x,y, feat):
     xt = np.transpose(util.zehidense(x))
     xt = xt[~np.all(xt == 0, axis=1).A1]
     xt = np.abs(np.corrcoef(xt))
-
-
     '''
     draw some projections of the data... PCA UMAP  and a heatmap
     '''
     if True:
+
+        elist = [(a,b) for a in Range(xt.shape[0]) for b in Range(xt.shape[0]) if xt[a,b] > .9]
+        grph = nx.Graph()
+        grph.add_edges_from(elist)
+        for comp in nx.connected_components(grph):
+            print("#########")
+            for e in comp:
+                print(feat[e])
+
+        plt.title('aggloclust')
+        draw.dendro(xt)
+        plt.show(); plt.close()
+
+
         plt.title("PCA")
         xt2d = PCA(n_components=2).fit_transform(xt)
         sc= plt.scatter(xt2d[:,0],xt2d[:,1],c=corr)

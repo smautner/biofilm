@@ -232,11 +232,6 @@ def agglosvm(X,Y,x,y,args):
 
 
 
-
-
-
-
-
 ##########################3
 #  ZE ENDO
 ########################
@@ -254,7 +249,7 @@ def main():
     args = opts.parse(featdoc)
     XYxy, feat, inst  = util.getfold()
 
-    #ftclust.ft(XYxy[0],XYxy[1], feat) TODO something to inspect features?? ftclust does that but only when cout low..
+    #ftclust.ft(XYxy[0],XYxy[1], feat) #TODO something to inspect features?? ftclust does that but only when cout low..
 
     res  = eval(args.method)(*XYxy, args)
     if args.runsvm:
