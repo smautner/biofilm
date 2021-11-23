@@ -1,5 +1,7 @@
 
 from lmz import Map, Range
+
+import biofilm.algo.feature_selection
 from biofilm import util
 import numpy as np
 from sklearn.mixture import GaussianMixture
@@ -8,7 +10,7 @@ from sklearn.decomposition import PCA
 from matplotlib import pyplot as plt
 from umap import UMAP
 import seaborn as sns
-from biofilm.algo import forest
+from biofilm.algo import feature_selection
 import pandas as pd
 from biofilm.util import draw
 import networkx as nx
@@ -34,13 +36,13 @@ def ft(x,y, feat):
 
     print(f"{feat=}")
     if x.shape[1] > 200:
-        score, _ = forest.forest(x,y,class_weight = 'balanced')
+        score, _ = feature_selection._forest(x, y, class_weight ='balanced')
         x = select(x,score,10000)
 
     corr  = spearman(x,y)
     # delete empty lines:
     xt = np.transpose(util.zehidense(x))
-    xt = xt[~np.all(xt == 0, axis=1).A1]
+    xt = xt[~biofilm.algo.feature_selection.all(xt == 0, axis=1).A1]
     xt = np.abs(np.corrcoef(xt))
     '''
     draw some projections of the data... PCA UMAP  and a heatmap
