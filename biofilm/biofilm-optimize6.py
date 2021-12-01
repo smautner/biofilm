@@ -1,5 +1,5 @@
-import dirtyopts
 import numpy as np
+import dirtyopts
 import structout as so
 from sklearn.metrics import  f1_score
 import pprint
@@ -65,7 +65,10 @@ def main():
     scorehistory =  np.nan_to_num(all.performance_over_time_['single_best_optimization_score'].to_numpy(),nan=0.0)
     util.report(estim, args.out, additionaloutput={'scorehistory': scorehistory , 'performancelog': all.performance_over_time_})
     so.lprint(scorehistory)
-
+    if data[0].shape[1] < 100:
+        print("SELECTED FEATURES:")
+        print(estim.steps[2][1].choice.preprocessor.get_support())
+    print(estim.config)
 
 
 if __name__ == "__main__":

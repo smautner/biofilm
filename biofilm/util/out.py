@@ -29,6 +29,11 @@ def report(estim, outputname, quiet=False, predict_train=False,additionaloutput=
     dumps the csv file
     dumps the model
     '''
+
+
+    ####
+    # run on test set
+    #########
     data, fea, ins = datautil.getfold()
     dataargs = datautil.getargs()
     params = get_params2(estim)
@@ -52,12 +57,13 @@ def report(estim, outputname, quiet=False, predict_train=False,additionaloutput=
         things = ['instance_id, true_label, predicted_label, instance_score, rand_init'] + things
         f.write('\n'.join( things ) )
         f.write('\n')
+        print("\n########## CSV WRITTEN ##########\n")
 
     ###########
     # PRINT OUT
     #######
     if not quiet:
-        print(f"{score=}")
+        print(f"TEST {score=}")
         pprint.pprint(params)
 
     ##########
@@ -67,8 +73,10 @@ def report(estim, outputname, quiet=False, predict_train=False,additionaloutput=
     d['score'] = score
     d['params'] = params
     d['estimator'] = estim
+
     d.update(additionaloutput)
     util.dumpfile(d, outputname+'.model')
+    print("\n########## MODEL WRITTEN ##########\n")
 
 
 optidoc='''
