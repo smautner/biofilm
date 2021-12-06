@@ -15,7 +15,16 @@ dumpfile  = lambda thing, fn: dill.dump(thing,open(fn,'wb'))
 
 def fit(X,Y,x,y, args):
     model = loadfile(args.model)['estimator']
-    model.fit(X,Y)
+
+    #ASK = AutoSklearnClassifier(per_run_time_limit=360,memory_limit=30000)
+    #ASK.fit_pipeline(X=X, y=Y,config=model.config)
+    #breakpoint()
+    #if "_preprocessor" in model.__dict__:
+    #    print("look me up! a90s8d70as")
+    #    X = model._preprocessor.transform(X)
+    model.refit(X,Y)
+    #print(model.config)
+    #pipeline = ASK.get_models_with_weights()[0][1]
     return model
 
 def main():

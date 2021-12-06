@@ -18,7 +18,6 @@ optidoc='''
 #--metric str f1 assert f1 auc   TODO
 '''
 
-
 def optimize(X,Y,x,y, args):
 
     if args.method == 'any':
@@ -40,7 +39,8 @@ def optimize(X,Y,x,y, args):
             include = include,
             memory_limit = int(240000/30),
             time_left_for_this_task = args.time,
-            metric = autosklearn.metrics.f1
+            metric = autosklearn.metrics.f1,
+            max_models_on_disc = 1
             )
     estim.fit(X,Y)
     #import code

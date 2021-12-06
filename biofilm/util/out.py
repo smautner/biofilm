@@ -24,11 +24,12 @@ def get_params2(ask):
     args=str(ask.steps[-1][1].choice.__dict__)
     return args
 
-def report(estim, outputname, quiet=False, predict_train=False,additionaloutput={}):
+def report(model, outputname, quiet=False, predict_train=False,additionaloutput={}):
     '''
     dumps the csv file
     dumps the model
     '''
+    pipeline = model.get_models_with_weights()[0][1]
 
 
     ####
@@ -36,7 +37,7 @@ def report(estim, outputname, quiet=False, predict_train=False,additionaloutput=
     #########
     data, fea, ins = datautil.getfold()
     dataargs = datautil.getargs()
-    params = get_params2(estim)
+    params = get_params2(pipeline)
     if predict_train or data[2].shape[0] ==0:
         X = data[0]
         y = data[1]
@@ -44,8 +45,8 @@ def report(estim, outputname, quiet=False, predict_train=False,additionaloutput=
         X = data[2]
         y= data[3]
 
-    pred  = estim.predict(X)
-    proba = estim.predict_proba(X)[:,1]
+    pred  = pipeline.predict(X)
+    proba = pipeline.predict_proba(X)[:,1]
     score = f1_score(y,pred)
 
     #####
@@ -72,7 +73,7 @@ def report(estim, outputname, quiet=False, predict_train=False,additionaloutput=
     d = {}
     d['score'] = score
     d['params'] = params
-    d['estimator'] = estim
+    d['estimator'] = model
 
     d.update(additionaloutput)
     util.dumpfile(d, outputname+'.model')

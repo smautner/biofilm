@@ -33,8 +33,6 @@ if what == 'makedata':
 
 
 
-
-
 '''
 1. load data
 we can do it in a fancy way, by providing a python file that has a
@@ -44,7 +42,7 @@ loaddata = f'--infile NOG/data/{dataset} --loader examples/cherriload.py '.split
 
 
 '''
-2. LETZ OPTYIMIZER
+2. LETZ OPTYIMIZE
 '''
 if what == 'optimize':
     mkdir -p NOG/optimized
@@ -60,7 +58,8 @@ if what == 'optimize':
 4. plot performance (so far)
 '''
 if what == 'plot1':
-    python biofilm/biofilm-out.py --infiles  @(glob(f'{folder}/*.csv'))
+    for f in glob(f'NOG/optimized/*.csv'):
+        python biofilm/biofilm-out.py --infiles  @(f)
 
 
 
@@ -68,28 +67,25 @@ if what == 'plot1':
 5. do crossval for all models
       use all 5 models to crossvalidate over all instances to compare them...
 '''
-if what == 'rerunCV':
-        # rum models
-        loaddata += '--foldselect {1}'.split()
-        parallel -j 5 --joblog delme.log $(which python) biofilm/biofilm-cv.py\
-            @(loaddata) --model '{2}' --out '{2}_{1}.last'\
-            ::: $(seq 0 4) ::: $(ls @(folder)/*optimized.model)
 
-if what == 'rerunCV2':
-        # rum models
-        loaddata += '--foldselect {1}'.split()
-        parallel -j 5 --joblog delme.log $(which python) biofilm/biofilm-cv.py\
-            @(loaddata) --model @(folder)/optimized.model --out @(who)'{1}.lastcv2'\
-            ::: $(seq 0 4)
+if what == 'runcv':
+    # rum models
+    loaddata += '--foldselect {1}'.split()
+    parallel -j 5 --joblog delme.log $(which python) biofilm/biofilm-cv.py @(loaddata)\
+        --model @('NOG/optimized/%s.model' % dataset)\
+        --out @('NOG/crossval/%s{1}.cv' % dataset)\
+        ::: $(seq 0 4)
 
 
-if what == "crossspec":
-    # after runopti2 and reruncv2 we have all the models we need
-    #  .lastcv2 files have the CV data... so we need the rest
-    for model in ["NOGHUMAN2","NOG","NOGMOUSE"]:
-        if model != who:
+if what == "crossmodel":
+    '''
+    1.    load the {dataset}
+    2.    run the model against it
+    '''
+    for model in fnames:
+        if model != dataset:
             python biofilm/util/out.py --folds 0 @(loaddata)\
-            --model @(model)/optimized.model --out @(f'CROSS_{model}_{who}')
+            --model @("NOG/optimized/%s.model" % model) --out @('NOG/crossmodel/%s%s' % (model,dataset))
 
 
 

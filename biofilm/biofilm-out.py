@@ -26,6 +26,7 @@ READ THE DATA
 seed -> [[score, tru, instance_name, prediction]]
 '''
 from collections import defaultdict
+print(f" reading csv files: {args.infiles=}")
 seeds = defaultdict(list)
 for e in args.infiles:
     for line in open(e,'r').read().split('\n')[1:]:
@@ -70,6 +71,8 @@ avg_score = [np.mean(x) for x in zip(*scores)]
 
 from sklearn.metrics import precision_recall_curve
 precision, recall, thresholds = precision_recall_curve( truth, avg_score)
+import structout as so
+so.lprint(thresholds)
 plt.plot(recall, precision, label=f"mean {'score' if args.rawproba else 'rank'} ({len(scores)} repeats)")
 plt.xlabel("recall")
 plt.ylabel("precision")
