@@ -25,13 +25,12 @@ if dataset == 'all':
 if what == 'makedata':
     print(f'makedata {dataset}')
     mkdir -p NOG/data/
+    # TODO change imoprt blabla to biofilm.examples.cherriload
     import examples.cherriload  as cl
     p = "/home/ubuntu/data/cherry/"+dataset
     d1 = p+'neg.csv'
     d2 = p+"pos.csv"
     cl.convert(d1,d2,f'NOG/data/{dataset}', graphfeatures=False)
-
-
 
 '''
 1. load data
@@ -46,12 +45,10 @@ loaddata = f'--infile NOG/data/{dataset} --loader examples/cherriload.py '.split
 '''
 if what == 'optimize':
     mkdir -p NOG/optimized
-    loaddata += '--folds 0'.split()
-    which python
+    loaddata += '--folds 0 --subsample 10000'.split()
+    # TODO python -m biofilm.biofilm-optimize6 should work
     python biofilm/biofilm-optimize6.py  @(loaddata)\
-        --out @(f'NOG/optimized/{dataset}') --preprocess True --n_jobs 30 --time 43200
-
-
+        --out @(f'NOG/optimized/{dataset}') --preprocess True --n_jobs 30 --time 28800
 
 
 '''
@@ -71,6 +68,7 @@ if what == 'plot1':
 if what == 'runcv':
     # rum models
     loaddata += '--foldselect {1}'.split()
+    # TODO python -m biofilm.biofilm-cv
     parallel -j 5 --joblog delme.log $(which python) biofilm/biofilm-cv.py @(loaddata)\
         --model @('NOG/optimized/%s.model' % dataset)\
         --out @('NOG/crossval/%s{1}.cv' % dataset)\
@@ -91,6 +89,10 @@ if what == "crossmodel":
 
 
 if what == 'trueplot':
+    '''
+    this is a leftover from the original scropt;
+    i might want t o make it run with this in the future
+    '''
     import matplotlib
     matplotlib.use('module://matplotlib-sixel')
     import matplotlib.pyplot as plt
@@ -108,22 +110,4 @@ if what == 'trueplot':
         if 'scorehistory' in d:
             plt.plot(d['scorehistory'])
             plt.show(); plt.close()
-
-
-if what == 'finalmodel':
-    model= {
-        'human': folder+'/0.optimized.model',
-        'human2': folder+'/2.optimized.model',
-        'mouse':  folder+'/2.optimized.model'
-    }
-    python biofilm/biofilm-cv.py --folds 0 @(loaddata)\
-        --model @(model[who]) --out @('UBERMODEL_'+who)
-
-
-if what == 'evalmouseonhuman':
-    python biofilm/util/out.py --model UBERMODELNOG.model --out MOUSEOUTNOG\
-        --infile examples/1923MONOG --loader examples/cherriload.py\
-        --folds 0 --predict_train True
-    python biofilm/biofilm-out.py --infiles "MOUSEOUTNOG.csv"
-
 
