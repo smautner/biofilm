@@ -109,7 +109,7 @@ setup(
     description='another opts parser',
     #long_description=open('README.md').read(),
     install_requires=[
-        'scikit-learn','ubergauss','lmz','dirtyopts','numpy', 'structout'
+        'scikit-learn','ubergauss','lmz','dirtyopts','numpy', 'structout', 'auto-sklearn'
         ],
     #entry_points = { 'console_scripts': ['biofilmop=biofilm.biofilm-optimize:main','biofilmft=biofilm.biofilm-features:main'] },
     cmdclass={'sdist': sdist, 'install': install}
