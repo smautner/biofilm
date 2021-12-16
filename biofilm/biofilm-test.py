@@ -7,7 +7,7 @@ from biofilm import util
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier as ASK2
 from autosklearn.classification import AutoSklearnClassifier as ASK1
 import autosklearn.metrics
-from sklearn.datasets import make_regression
+from sklearn.datasets import make_classification
 
 
 '''
@@ -21,7 +21,7 @@ estim = ASK1( n_jobs = 3,
             metric = autosklearn.metrics.f1,
             max_models_on_disc = 1)
 
-X,Y = make_regression()
+X,Y = make_classification()
 estim.fit(X,Y)
 
 scorehistory =  np.nan_to_num(\
