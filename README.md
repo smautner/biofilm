@@ -1,8 +1,17 @@
 
 
+# install
+
+```
+get conda forge in the channel list
+get compiler stuff for auto-sklearn installed
+
+conda install -c smautner biofilm
+```
+
 # Feature selection is already nice:
 
-go to biofilm and run python biofilm-features.py -h  
+go to biofilm and run python biofilm-features.py -h
 
 ```
 # options for feature selection:
@@ -20,9 +29,9 @@ go to biofilm and run python biofilm-features.py -h
 ```
 
 
-# lets make an overview of how things talk to each other: 
+# lets make an overview of how things talk to each other:
 
-## data loading 
+## data loading
 defaultformat: X,y in a npz dump, features and instances get enumerated
 a custom dataloader: X,y, features, instances
 

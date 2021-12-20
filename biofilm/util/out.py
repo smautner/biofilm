@@ -4,9 +4,14 @@ import biofilm.util.data as datautil
 import pprint
 from biofilm import util
 
-
-
 import re
+optidoc='''
+--out str outname
+--model str inputmodel
+--predict_train bool False
+'''
+import dirtyopts
+
 def get_params(ask):
     '''
     this is supposed to work, however
@@ -80,17 +85,11 @@ def report(model, outputname, quiet=False, predict_train=False,additionaloutput=
     print("\n########## MODEL WRITTEN ##########\n")
 
 
-optidoc='''
---out str outname
---model str inputmodel
---predict_train bool False
-'''
-import dirtyopts
-args = dirtyopts.parse(optidoc)
 
 if __name__ == "__main__":
+    args = dirtyopts.parse(optidoc)
     mod = util.loadfile(args.model)
-    #print(mod)
-
-    report(mod['estimator'], args.out,predict_train = args.predict_train )
-
+    if type(mod)==dict:
+        report(mod['estimator'], args.out,predict_train = args.predict_train )
+    else: # TODO  we should never arrive here, but we do, this should be solved at some opint
+        report(mod, args.out,predict_train = args.predict_train )

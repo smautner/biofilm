@@ -61,7 +61,7 @@ def loadfolds(infile=None,loader=None,randinit=None, folds=None,foldselect=None,
 
 
 
-    if subsample > 1:
+    if subsample > 1 and X.shape[0]>subsample:
         X,y, instances = resample(X,y,instances, replace=False,
                 n_samples=subsample,
                 random_state=randinit,

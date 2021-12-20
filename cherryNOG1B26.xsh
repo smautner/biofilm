@@ -74,16 +74,23 @@ if what == 'runcv':
         --out @('NOG/crossval/%s{1}.cv' % dataset)\
         ::: $(seq 0 4)
 
+if what == "refit":
+    mkdir -p NOG/refit
+    python -m biofilm.biofilm-cv --folds 0 @(loaddata)\
+        --model @('NOG/optimized/%s.model' % dataset)\
+        --out @('NOG/refit/%s.model' % dataset)
+
 
 if what == "crossmodel":
     '''
     1.    load the {dataset}
     2.    run the model against it
     '''
+    mkdir -p NOG/crossmodel
     for model in fnames:
         if model != dataset:
             python biofilm/util/out.py --folds 0 @(loaddata)\
-            --model @("NOG/optimized/%s.model" % model) --out @('NOG/crossmodel/%s%s' % (model,dataset))
+            --model @("NOG/refit/%s.model.model" % model) --out @('NOG/crossmodel/%s%s' % (model,dataset))
 
 
 
