@@ -7,11 +7,10 @@ import numpy as np
 from sklearn.svm import LinearSVC
 from sklearn.metrics import f1_score
 import structout as so
-r
 from biofilm import util
 from biofilm.algo import feature_inspection
-
-
+from biofilm.algo.feature_selection import *
+from sklearn.ensemble import RandomForestClassifier
 featdoc='''
 # options for feature selection:
 --method str svm  svm all corr variance logistic relaxedlasso  VarianceInflation aggloclust forest
@@ -23,7 +22,6 @@ featdoc='''
 --penalty str l1
 --varthresh float 1
 
---runsvm bool True
 --showtop int 0
 '''
 
@@ -32,14 +30,6 @@ featdoc='''
 #  ZE ENDO
 ########################
 
-def performancetest(X,Y,x,y,selected, scores):
-    clf = LinearSVC(class_weight = 'balanced', max_iter=1000)
-    X = X[:,selected]
-    x = x[:,selected]
-    clf.fit(X,Y)
-    performance =  f1_score(y, clf.predict(x))
-    print(f" performance of {X.shape[1]} features: {performance:.3f} \
-            {so.intlistV2.doALine(np.sort(scores),characterlimit=50)}")
 
 def main():
     args = opts.parse(featdoc)
@@ -48,8 +38,9 @@ def main():
     #ftclust.ft(XYxy[0],XYxy[1], feat) #TODO something to inspect features?? ftclust does that but only when cout low..
 
     res  = eval(args.method)(*XYxy, args)
-    if args.runsvm:
-        performancetest(*XYxy, res[0], res[1])
+
+    performancetest(*XYxy,res[0])
+    so.lprint(np.sort(res[1]))
     #import pprint;pprint.pprint(res)
 
     def np_bool_select(numpi, bools):
@@ -65,4 +56,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

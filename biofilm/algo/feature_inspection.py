@@ -32,8 +32,6 @@ __doc__ = '''
 
 
 def ft(x,y, feat):
-
-
     print(f"{feat=}")
     if x.shape[1] > 200:
         score, _ = feature_selection._forest(x, y, class_weight ='balanced')
@@ -44,11 +42,11 @@ def ft(x,y, feat):
     xt = np.transpose(util.zehidense(x))
     xt = xt[~biofilm.algo.feature_selection.all(xt == 0, axis=1).A1]
     xt = np.abs(np.corrcoef(xt))
+
     '''
     draw some projections of the data... PCA UMAP  and a heatmap
     '''
     if True:
-
         elist = [(a,b) for a in Range(xt.shape[0]) for b in Range(xt.shape[0]) if xt[a,b] > .9]
         grph = nx.Graph()
         grph.add_edges_from(elist)
@@ -56,7 +54,6 @@ def ft(x,y, feat):
             print("#########")
             for e in comp:
                 print(feat[e])
-
         plt.title('aggloclust')
         draw.dendro(xt)
         plt.show(); plt.close()
@@ -101,6 +98,7 @@ def ft(x,y, feat):
         topscr = lambda l: np.max(corr[labels == l])
         #return np.mean(Map(topscr, np.unique(labels)))
         return Map(topscr, np.unique(labels))
+
     avgMaxCorPerClust = Map(avgmaxcorr,clusterings)
 
     plt.scatter([z for z in  nc for i in range(z)], [i for a in avgMaxCorPerClust for i in a])

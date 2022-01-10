@@ -3,9 +3,9 @@ import eden.graph as eg
 import networkx as nx
 import numpy as np
 from collections import defaultdict
-from scipy.sparse import csr_matrix, hstack, load_npz, save_npz
+from scipy.sparse import csr_matrix, hstack, load_npz, save_npz, vstack
 partner =  {a:b for a,b in zip("({[<",")}]>")  }
-import basics as ba
+from ubergauss import tools
 from lmz import *
 import pandas as pd
 
@@ -48,13 +48,14 @@ def convert(negname, posname, outname, graphfeatures=True):
     X = X[:,d1.dtypes != 'object']
     X=csr_matrix(X.astype(np.float64))
 
-    ba.dumpfile([name for name,ok in zip(d1.columns.tolist(), d1.dtypes) if ok != 'object'],outname+'.index.dmp')
+    tools.dumpfile([name for name,ok in zip(d1.columns.tolist(), d1.dtypes) if ok != 'object'],outname+'.index.dmp')
 
 
     if graphfeatures:
-        graphs = [mkgraph(seq, stru) for d in [d1,d2] for seq,stru in  zip(d['subseqDP'],d['hybridDP'])  ]
-        #graphs = ba.mpmap(mkgr,  [a  for d in [d1,d2] for a in  zip(d['subseqDP'],d['hybridDP'])])
-        X2 = eg.vectorize(graphs)
+        #graphs = [mkgraph(seq, stru) for d in [d1,d2] for seq,stru in  zip(d['subseqDP'],d['hybridDP'])  ]
+        graphs = tools.xmap(mkgr,  [a  for d in [d1,d2] for a in  zip(d['subseqDP'],d['hybridDP'])],32)
+        #X2 = eg.vectorize(graphs)
+        X2 = csr_matrix(vstack(tools.xmap(eg.vectorize,[[g] for g in graphs])))
         X= csr_matrix(hstack((X,X2)))
 
     save_npz(outname+'.X.csr',X)
@@ -68,7 +69,7 @@ def read(name):
     #y = np.load(name + '.y.npz',allow_pickle=True).reshape((-1,1))
     #print(f" {X.shape} {y.shape}")
 
-    namez = ba.loadfile(name+'.index.dmp')
+    namez = tools.loadfile(name+'.index.dmp')
     return X,y, namez + Range(X.shape[1] - len(namez)), np.array(range(X.shape[0]))
 
 

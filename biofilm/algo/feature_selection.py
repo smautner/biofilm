@@ -24,8 +24,7 @@ from biofilm.algo import feature_inspection
 from sklearn.ensemble import RandomForestClassifier
 from biofilm import algo, util
 
-
-
+import networkx as nx
 
 def relaxedlasso(X,Y,x,y,args):
     print("RELAXED LASSO NOT IMPLEMENTD ") # TODO
@@ -35,14 +34,67 @@ def _forest(X, Y, **kwargs):
     model = RandomForestClassifier(**kwargs).fit(X,Y)
     quality = model.feature_importances_
     return  quality, model
+
+def quick_corr(X,Y):
+    corr  = tools.spearman(X,Y)
+    xt = np.transpose(tools.zehidense(X))
+    #xt = xt[~np.all(xt == 0, axis=1).A1]
+    xt = xt[~np.all(xt == 0, axis=1)]
+    xt = np.abs(np.corrcoef(xt))
+    elist = [(a,b) for a in Range(xt.shape[0]) for b in Range(xt.shape[0]) if xt[a,b] > .9]
+    grph = nx.Graph()
+    grph.add_edges_from(elist)
+    '''
+    import eden.display as ed
+    import matplotlib
+    matplotlib.use('module://matplotlib-sixel')
+    import matplotlib.pyplot as plt
+    ed.draw_graph(grph)
+    plt.show()
+    '''
+    def getbest(cmp):
+        if len(cmp) ==1:
+            return cmp.pop()
+        else:
+            #print(cmp)
+            return max([(corr[n],n) for n in cmp])[1]
+    #z = [ getbest(comp) for comp in nx.connected_components(grph)]
+    z = [ getbest(comp) for comp in nx.find_cliques(grph)]
+    zz = np.zeros(X.shape[1])
+    zz[z] = 1
+    return zz.astype('bool')
+
+
+def deepforest(X,Y,x,y, args):
+    r , scr = forest(X,Y,x,y, args)
+    performancetest(X,Y,x,y,r)
+    X = tools.zehidense(X)[:,r]
+    z = quick_corr(X,Y)
+    r[r==True]=z
+    return r, scr
+
+def testforest():
+    from sklearn.datasets import make_classification
+    X,Y = make_classification(n_samples= 1000)
+    X,x = X[:800],X[-200:]
+    Y,y = Y[:800],Y[-200:]
+    forest(X,Y,x,y,{})
+
+
 def forest(X,Y,x,y,args):
-    scores, model = algo.feature_selection._forest(class_weight='balanced', random_state = 0)
-    res =  autothresh(scores)[0]
+    scores, model = _forest(X,Y,class_weight='balanced', random_state = 0)
+    # do autothresh but only on the scores that are > 0 anyway
+    viablescores = scores> 0.0001
+    re =  autothresh(scores[viablescores])[0]
+    res = scores.copy();res.fill(False)
+    res[viablescores] = re
+
     # TODO I THINK I SHOULD RERAIN>>> or just use the default linear model...
     trainscore   = f1_score(Y, model.predict(X))
     testscore   = f1_score(y, model.predict(x))
-    print(f" {trainscore=:.2f} {testscore=:.2f}")
-    return res, scores
+
+    print(f"forest: {trainscore=:.2f} {testscore=:.2f} features: 0,reject,acpt {X.shape[1]-sum(viablescores)} {sum(re==False)} {sum(res)}")
+    return res.astype('bool'), scores
 
 
 def lasso(X,Y,x,y,args):
@@ -115,6 +167,8 @@ def autothresh(arr, cov = 'tied'):
     cpy = np.array(arr)
     cpy.sort()
     rr = ubergauss.between_gaussians(cpy, covariance_type = cov)
+    #so.lprint(cpy)
+    #print(f"cut at: {rr/cpy.shape[0]}")
     return arr >= cpy[rr] , cpy[rr]
 
 
@@ -164,7 +218,7 @@ def corr(X,Y,x,y,args):
     return res, cor
 
 
-def all(X,Y,x,y,args):
+def selectall(X,Y,x,y,args):
     res = np.full( X.shape[1], True)
     return res,res
 
@@ -229,3 +283,17 @@ def agglosvm(X,Y,x,y,args):
     res[res == 1] = caccept
     print(f"aglo+ features: {sum(res)}/{len(res)} ",end ='')
     return res, np.full(X.shape[1],1)
+
+
+
+
+
+def performancetest(X,Y,x,y,selected):
+    clf = RandomForestClassifier(class_weight = 'balanced')
+    X = X[:,selected]
+    x = x[:,selected]
+    clf.fit(X,Y)
+    performance =  f1_score(y, clf.predict(x))
+    print(f" performance of {X.shape[1]} features: {performance:.3f} ")
+
+
