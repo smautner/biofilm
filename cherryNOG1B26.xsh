@@ -3,7 +3,16 @@ from glob import glob
 what =  sys.argv[1]
 dataset =  sys.argv[2]
 
+'''
+script to train and evaluate the rnarnainteration data
 
+use like this:
+    xonsh cherryNOG1B26.xsh makedata all
+    xonsh cherryNOG1B26.xsh optimize all
+    xonsh cherryNOG1B26.xsh runcv all
+    xonsh cherryNOG1B26.xsh refit all
+    xonsh cherryNOG1B26.xsh crossmodel all
+'''
 
 fnames = ['paris_human_RRI_',
  'full_',
@@ -32,11 +41,6 @@ if what == 'makedata':
     d2 = p+"pos.csv"
     cl.convert(d1,d2,f'NOG/data/{dataset}', graphfeatures=False)
 
-'''
-1. load data
-we can do it in a fancy way, by providing a python file that has a
-read(path) function. as demonstrated in examples/cherriload.py
-'''
 loaddata = f'--infile NOG/data/{dataset} --loader examples/cherriload.py '.split()
 
 
@@ -51,18 +55,11 @@ if what == 'optimize':
         --out @(f'NOG/optimized/{dataset}') --preprocess True --n_jobs 30 --time 28800
 
 
-'''
-4. plot performance (so far)
-'''
-if what == 'plot1':
-    for f in glob(f'NOG/optimized/*.csv'):
-        python biofilm/biofilm-out.py --infiles  @(f)
 
 
 
 '''
-5. do crossval for all models
-      use all 5 models to crossvalidate over all instances to compare them...
+retrain and cv to get all the csv files
 '''
 
 if what == 'runcv':
@@ -93,28 +90,4 @@ if what == "crossmodel":
             --model @("NOG/refit/%s.model.model" % model) --out @('NOG/crossmodel/%s%s' % (model,dataset))
 
 
-
-
-if what == 'trueplot':
-    '''
-    this is a leftover from the original scropt;
-    i might want t o make it run with this in the future
-    '''
-    import matplotlib
-    matplotlib.use('module://matplotlib-sixel')
-    import matplotlib.pyplot as plt
-    import dill
-    import pprint
-    loadfile = lambda filename: dill.load(open(filename, 'rb'))
-    for i in range(0,5):
-        print(f"########### {i} ############")
-        filez =  glob(f'{folder}/{i}*.last.csv')
-        python biofilm/biofilm-out.py --infiles @(filez)
-        d = loadfile(filez[0].split("_")[0]) # will load the model file
-        print("self-score: ",d['score'])
-        print("PARAMETERS")
-        pprint.pprint(d['params'])
-        if 'scorehistory' in d:
-            plt.plot(d['scorehistory'])
-            plt.show(); plt.close()
 
