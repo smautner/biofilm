@@ -1,7 +1,7 @@
 from lmz import Map,Zip,Filter,Grouper,Range,Transpose
 import dirtyopts as opts
-import matplotlib
-matplotlib.use('module://matplotlib-sixel')
+#import matplotlib
+#matplotlib.use('module://matplotlib-sixel')
 import matplotlib.pyplot as plt
 import scipy.sparse as sparse
 import numpy as np

@@ -8,8 +8,6 @@ from sklearn.mixture import GaussianMixture
 from scipy.stats import spearmanr
 from sklearn.decomposition import PCA
 from matplotlib import pyplot as plt
-from umap import UMAP
-import seaborn as sns
 from biofilm.algo import feature_selection
 import pandas as pd
 from biofilm.util import draw
@@ -46,6 +44,8 @@ def ft(x,y, feat):
     '''
     draw some projections of the data... PCA UMAP  and a heatmap
     '''
+    from umap import UMAP
+    import seaborn as sns
     if True:
         elist = [(a,b) for a in Range(xt.shape[0]) for b in Range(xt.shape[0]) if xt[a,b] > .9]
         grph = nx.Graph()

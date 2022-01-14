@@ -1,8 +1,5 @@
 from lmz import Map,Zip,Filter,Grouper,Range,Transpose
 import dirtyopts as opts
-import matplotlib
-matplotlib.use('module://matplotlib-sixel')
-import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.svm import LinearSVC
 from sklearn.metrics import f1_score

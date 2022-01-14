@@ -1,0 +1,140 @@
+
+import sys
+from glob import glob
+what =  sys.argv[1]
+dataset =  sys.argv[2]
+
+'''
+this is a copy of 1c20 to see if we can quickly run it
+and share the model files...
+'''
+
+fnames = [
+    'splash_human_RRI_',
+    'paris_human_RRI_',
+    'full_',
+    'full_human_',
+    'paris_human_RBPs_',
+    'paris_splash_human_RRI_',
+    'paris_mouse_RRI_']
+
+
+
+if dataset == 'all':
+    for target in fnames:
+        `shellpy test1C20.spy {what} {target}`
+    exit()
+
+
+# ok lets make some DATA
+if what == 'makedata':
+    print(f'makedata {dataset}')
+    `mkdir -p testb66/data/`
+    # TODO change imoprt blabla to biofilm.examples.cherriload
+    import examples.cherriload  as cl
+    p = "/home/ubuntu/data/cherry/"+dataset
+    d1 = p+'neg.csv'
+    d2 = p+"pos.csv"
+    cl.convert(d1,d2,f'testb66/data/{dataset}', graphfeatures=True)
+
+'''
+1. load data
+we can do it in a fancy way, by providing a python file that has a
+read(path) function. as demonstrated in examples/cherriload.py
+'''
+loaddata = f'--infile testb66/data/{dataset} --loader examples/cherriload.py '
+
+
+
+if what == 'selectft':
+    `mkdir -p testb66/features`
+    loaddata += '--subsample 20000 '
+    out = f'testb66/features/{dataset}'
+    `python -m biofilm.biofilm-features {loaddata} --method forest --out {out}`
+
+
+'''
+2. LETZ OPTYIMIZE
+'''
+if what == 'optimize':
+    `mkdir -p testb66/optimized`
+    loaddata += f'--folds 0 --subsample 10000 --featurefile testb66/features/{dataset}'
+    # TODO python -m biofilm.biofilm-optimize6 should work
+    #python biofilm/biofilm-optimize6.py  @(loaddata)\
+    out  = f'testb66/optimized/{dataset}'
+    `python -m biofilm.biofilm-optimize6 {loaddata} --out {out}  --preprocess True --n_jobs 30 --time 1000`
+
+
+
+"""
+
+'''
+4. plot performance (so far)
+'''
+if what == 'plot1':
+    for f in glob(f'testb66/optimized/*.csv'):
+        python biofilm/biofilm-out.py --infiles  @(f)
+
+'''
+5. do crossval for all models
+      use all 5 models to crossvalidate over all instances to compare them...
+'''
+
+if what == 'runcv':
+    # rum models
+    loaddata += f'--foldselect {{1}} --featurefile testb66/features/{dataset}'.split()
+    # TODO python -m biofilm.biofilm-cv
+    mkdir -p testb66/crossval
+    parallel -j 5 --joblog delme.log $(which python) biofilm/biofilm-cv.py @(loaddata)\
+        --model @('testb66/optimized/%s.model' % dataset)\
+        --out @('testb66/crossval/%s{1}.cv' % dataset)\
+        ::: $(seq 0 4)
+
+if what == "refit":
+    mkdir -p testb66/refit
+    loaddata += f'--featurefile testb66/features/{dataset}'.split()
+    python -m biofilm.biofilm-cv --folds 0 @(loaddata)\
+        --model @('testb66/optimized/%s.model' % dataset)\
+        --out @('testb66/refit/%s.model' % dataset)
+
+
+if what == "crossmodel":
+    '''
+    1.    load the {dataset}
+    2.    run the model against it
+    '''
+    mkdir -p testb66/crossmodel
+    for model in fnames:
+        loaddata_mod = loaddata+f'--featurefile testb66/features/{model}'.split()
+        print(loaddata_mod)
+        if model != dataset:
+            python biofilm/util/out.py --folds 0 @(loaddata_mod)\
+            --model @("testb66/refit/%s.model.model" % model) --out @('testb66/crossmodel/%s%s' % (model,dataset))
+
+
+
+
+if what == 'trueplot':
+    '''
+    this is a leftover from the original scropt;
+    i might want t o make it run with this in the future
+    '''
+    import matplotlib
+    matplotlib.use('module://matplotlib-sixel')
+    import matplotlib.pyplot as plt
+    import dill
+    import pprint
+    loadfile = lambda filename: dill.load(open(filename, 'rb'))
+    for i in range(0,5):
+        print(f"########### {i} ############")
+        filez =  glob(f'{folder}/{i}*.last.csv')
+        python biofilm/biofilm-out.py --infiles @(filez)
+        d = loadfile(filez[0].split("_")[0]) # will load the model file
+        print("self-score: ",d['score'])
+        print("PARAMETERS")
+        pprint.pprint(d['params'])
+        if 'scorehistory' in d:
+            plt.plot(d['scorehistory'])
+            plt.show(); plt.close()
+
+"""
