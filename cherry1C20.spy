@@ -29,27 +29,27 @@ if dataset == 'all':
 # ok lets make some DATA
 if what == 'makedata':
     print(f'makedata {dataset}')
-    `mkdir -p testb66/data/`
+    `mkdir -p testb71/data/`
     # TODO change imoprt blabla to biofilm.examples.cherriload
     import examples.cherriload  as cl
     p = "/home/ubuntu/data/cherry/"+dataset
     d1 = p+'neg.csv'
     d2 = p+"pos.csv"
-    cl.convert(d1,d2,f'testb66/data/{dataset}', graphfeatures=True)
+    cl.convert(d1,d2,f'testb71/data/{dataset}', graphfeatures=True)
 
 '''
 1. load data
 we can do it in a fancy way, by providing a python file that has a
 read(path) function. as demonstrated in examples/cherriload.py
 '''
-loaddata = f'--infile testb66/data/{dataset} --loader examples/cherriload.py '
+loaddata = f'--infile testb71/data/{dataset} --loader examples/cherriload.py '
 
 
 
 if what == 'selectft':
-    `mkdir -p testb66/features`
+    `mkdir -p testb71/features`
     loaddata += '--subsample 20000 '
-    out = f'testb66/features/{dataset}'
+    out = f'testb71/features/{dataset}'
     `python -m biofilm.biofilm-features {loaddata} --method forest --out {out}`
 
 
@@ -57,11 +57,11 @@ if what == 'selectft':
 2. LETZ OPTYIMIZE
 '''
 if what == 'optimize':
-    `mkdir -p testb66/optimized`
-    loaddata += f'--folds 0 --subsample 10000 --featurefile testb66/features/{dataset}'
+    `mkdir -p testb71/optimized`
+    loaddata += f'--folds 0 --subsample 10000 --featurefile testb71/features/{dataset}'
     # TODO python -m biofilm.biofilm-optimize6 should work
     #python biofilm/biofilm-optimize6.py  @(loaddata)\
-    out  = f'testb66/optimized/{dataset}'
+    out  = f'testb71/optimized/{dataset}'
     `python -m biofilm.biofilm-optimize6 {loaddata} --out {out}  --preprocess True --n_jobs 30 --time 1000`
 
 
@@ -72,7 +72,7 @@ if what == 'optimize':
 4. plot performance (so far)
 '''
 if what == 'plot1':
-    for f in glob(f'testb66/optimized/*.csv'):
+    for f in glob(f'testb71/optimized/*.csv'):
         python biofilm/biofilm-out.py --infiles  @(f)
 
 '''

@@ -110,7 +110,7 @@ setup(
     #long_description=open('README.md').read(),
     install_requires=[
         'scikit-learn==0.24.2','ubergauss==0.0.36','lmz==0.1.11','dirtyopts==0.0.17','numpy==1.22.0',
-        'structout==0.1.36', 'auto-sklearn==0.14.2', 'shellpy == 0.5.1'
+        'structout==0.1.36', 'auto-sklearn==0.14.2', 'shellpy == 0.5.1', "eden-kernel==0.3.1346"
         ],
     #entry_points = { 'console_scripts': ['biofilmop=biofilm.biofilm-optimize:main','biofilmft=biofilm.biofilm-features:main'] },
     cmdclass={'sdist': sdist, 'install': install}
