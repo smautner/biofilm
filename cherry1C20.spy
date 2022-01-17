@@ -8,6 +8,8 @@ dataset =  sys.argv[2]
 this is a copy of 1c20 to see if we can quickly run it
 and share the model files...
 '''
+`export PYTHONHASHSEED=31337`
+
 
 fnames = [
     'splash_human_RRI_',
@@ -66,14 +68,13 @@ if what == 'optimize':
 
 
 
-"""
 
 '''
 4. plot performance (so far)
 '''
 if what == 'plot1':
     for f in glob(f'testb71/optimized/*.csv'):
-        python biofilm/biofilm-out.py --infiles  @(f)
+        `python biofilm/biofilm-out.py --infiles  {f}`
 
 '''
 5. do crossval for all models
@@ -82,20 +83,26 @@ if what == 'plot1':
 
 if what == 'runcv':
     # rum models
-    loaddata += f'--foldselect {{1}} --featurefile testb66/features/{dataset}'.split()
+    loaddata += f'--foldselect {{1}} --featurefile testb71/features/{dataset}'
     # TODO python -m biofilm.biofilm-cv
-    mkdir -p testb66/crossval
-    parallel -j 5 --joblog delme.log $(which python) biofilm/biofilm-cv.py @(loaddata)\
-        --model @('testb66/optimized/%s.model' % dataset)\
-        --out @('testb66/crossval/%s{1}.cv' % dataset)\
-        ::: $(seq 0 4)
+    `mkdir -p testb71/crossval`
+    py = `which python`
+    seq = `seq 0 4`
+    `parallel -j 5 --joblog delme.log $(which python) biofilm/biofilm-cv.py {loaddata} --model testb71/optimized/{dataset}.model --out testb71/crossval/{dataset}_{{1}}.cv ::: $(seq 0 4)`
 
+
+
+
+
+
+
+"""
 if what == "refit":
-    mkdir -p testb66/refit
-    loaddata += f'--featurefile testb66/features/{dataset}'.split()
+    mkdir -p testb71/refit
+    loaddata += f'--featurefile testb71/features/{dataset}'.split()
     python -m biofilm.biofilm-cv --folds 0 @(loaddata)\
-        --model @('testb66/optimized/%s.model' % dataset)\
-        --out @('testb66/refit/%s.model' % dataset)
+        --model @('testb71/optimized/%s.model' % dataset)\
+        --out @('testb71/refit/%s.model' % dataset)
 
 
 if what == "crossmodel":
@@ -103,13 +110,13 @@ if what == "crossmodel":
     1.    load the {dataset}
     2.    run the model against it
     '''
-    mkdir -p testb66/crossmodel
+    mkdir -p testb71/crossmodel
     for model in fnames:
-        loaddata_mod = loaddata+f'--featurefile testb66/features/{model}'.split()
+        loaddata_mod = loaddata+f'--featurefile testb71/features/{model}'.split()
         print(loaddata_mod)
         if model != dataset:
             python biofilm/util/out.py --folds 0 @(loaddata_mod)\
-            --model @("testb66/refit/%s.model.model" % model) --out @('testb66/crossmodel/%s%s' % (model,dataset))
+            --model @("testb71/refit/%s.model.model" % model) --out @('testb71/crossmodel/%s%s' % (model,dataset))
 
 
 
