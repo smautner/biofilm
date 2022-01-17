@@ -2,7 +2,6 @@ import numpy as np
 import structout as so
 from sklearn.metrics import  f1_score
 from sklearn.model_selection import RandomizedSearchCV as RSCV
-import searchspace as ss
 from pprint import pprint
 import copy
 from lmz import *
@@ -12,12 +11,12 @@ from sklearn.model_selection import StratifiedShuffleSplit as SSSplit
 from scipy.stats.mstats import pearsonr
 import biofilm.binsearch.limit as limit
 
-class binsearch(RSCV): 
+class binsearch(RSCV):
     def fit(self, X, y=None, *, groups=None, **fit_params):
         assert self.n_iter >=25, "n_iter should be at least 25"
         # we want to change theese:
         self.binlog = 0,{}
-        self.param_distributions = self.binsearch(X,y) 
+        self.param_distributions = self.binsearch(X,y)
         #pparm(self.param_distributions)
         super().fit(X,y,groups=groups,**fit_params)
 
@@ -51,8 +50,8 @@ class binsearch(RSCV):
 
     def halfsearch_cool(self,X,Y, params, niter):
         train_size  = (self.cv-1)/(self.cv*2)
-        test_size= (1-train_size)/2 
-        splitter = SSSplit(self.cv, train_size=train_size) 
+        test_size= (1-train_size)/2
+        splitter = SSSplit(self.cv, train_size=train_size)
         # Randomized search on hyper parameters
         searcher = RSCV(self.estimator,
                     params,
