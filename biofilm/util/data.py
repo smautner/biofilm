@@ -5,6 +5,7 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from lmz import iterselect, Range
 import scipy.sparse as sparse
+from ubergauss import tools
 datadoc='''
 # theese are the options for reading data
 --infile str myNumpyDump
@@ -34,11 +35,22 @@ def getfold():
 def loadfolds(infile=None,loader=None,randinit=None, folds=None,foldselect=None, subsample=None, Z=None, featurefile=None, featurecount=None):
 
     if not loader:
+        # assume data as saved via ubergauss.tools.ndumpfile
+        raw = tools.nloadfile(infile)
+        X  = raw[0]
+        if len(raw) < 3:
+            raw.append( np.array(Range(X.shape[1])) )
+        if len(raw) < 4:
+            raw.append( np.array(Range(X.shape[0])) )
+        """
         d = np.load(infile,allow_pickle=True)
         X,y  = [d[f'arr_{x}'] for x in range(2)]
         print(f" {X.shape=} {y.shape=}")
         instances = np.array(Range(X.shape[0]))
         features = np.array(Range(X.shape[1]))
+        """
+
+        X,y, features, instances = raw
     else:
         scope = {}
         exec(open(loader,'r').read(), scope)

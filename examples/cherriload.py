@@ -48,7 +48,7 @@ def convert(negname, posname, outname, graphfeatures=True):
     X = X[:,d1.dtypes != 'object']
     X=csr_matrix(X.astype(np.float64))
 
-    tools.dumpfile([name for name,ok in zip(d1.columns.tolist(), d1.dtypes) if ok != 'object'],outname+'.index.dmp')
+    col_namez= [name for name,ok in zip(d1.columns.tolist(), d1.dtypes) if ok != 'object']
 
 
     if graphfeatures:
@@ -57,20 +57,9 @@ def convert(negname, posname, outname, graphfeatures=True):
         #X2 = eg.vectorize(graphs)
         X2 = csr_matrix(vstack(tools.xmap(eg.vectorize,[[g] for g in graphs])))
         X= csr_matrix(hstack((X,X2)))
+        X= X.todense()
 
-    save_npz(outname+'.X.csr',X)
-    np.savez(outname+'.y.npz',y)
-    return X,y
-
-
-def read(name):
-    X = load_npz(name+".X.csr.npz")
-    y = np.load(name + '.y.npz',allow_pickle=True)['arr_0']
-    #y = np.load(name + '.y.npz',allow_pickle=True).reshape((-1,1))
-    #print(f" {X.shape} {y.shape}")
-
-    namez = tools.loadfile(name+'.index.dmp')
-    return X,y, namez + Range(X.shape[1] - len(namez)), np.array(range(X.shape[0]))
+    tools.ndumpfile( ( X,y, col_namez + Range(X.shape[1] - len(col_namez))), outname)
 
 
 
