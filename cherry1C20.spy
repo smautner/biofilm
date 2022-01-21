@@ -34,7 +34,7 @@ if what == 'makedata':
     `mkdir -p testb71/data/`
     # TODO change imoprt blabla to biofilm.examples.cherriload
     import examples.cherriload  as cl
-    p = "/home/ubuntu/data/cherry/"+dataset
+    p = "~/data/cherry/"+dataset
     d1 = p+'neg.csv'
     d2 = p+"pos.csv"
     cl.convert(d1,d2,f'testb71/data/{dataset}', graphfeatures=True)

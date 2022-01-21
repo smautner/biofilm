@@ -1,4 +1,4 @@
-import RNA_RNA_binding_evaluation.get_features as cri
+#import RNA_RNA_binding_evaluation.get_features as cri
 import eden.graph as eg
 import networkx as nx
 import numpy as np
