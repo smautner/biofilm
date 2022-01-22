@@ -9,7 +9,7 @@ from ubergauss import tools
 datadoc='''
 # theese are the options for reading data
 --infile str myNumpyDump
---loader str loaderfile # optional path to a python file that introduces a load function
+--loader str  # optional path to a python file that introduces a load function
 
 
 --randinit int 1337
@@ -33,7 +33,6 @@ def getfold():
 
 
 def loadfolds(infile=None,loader=None,randinit=None, folds=None,foldselect=None, subsample=None, Z=None, featurefile=None, featurecount=None):
-
     if not loader:
         # assume data as saved via ubergauss.tools.ndumpfile
         raw = tools.nloadfile(infile)

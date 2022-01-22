@@ -59,7 +59,7 @@ def convert(negname, posname, outname, graphfeatures=True):
         X= csr_matrix(hstack((X,X2)))
         X= X.todense()
 
-    tools.ndumpfile( ( X,y, col_namez + Range(X.shape[1] - len(col_namez))), outname)
+    tools.ndumpfile( [ X,y, col_namez + Range(X.shape[1] - len(col_namez))], outname)
 
 
 
