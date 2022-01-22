@@ -32,10 +32,13 @@ go to biofilm and run python biofilm-features.py -h
 # lets make an overview of how things talk to each other:
 
 ## data loading
+
+a) tools.ndumpfile([X,y, featurenames, instancenames],fname) where feature and instancenames are optional or
+b) provide --loader whose read function will be called
+
 defaultformat: X,y in a npz dump, features and instances get enumerated
 a custom dataloader: X,y, features, instances
-
-loadfolds: XYxy features namesOfTestInstances
+loadfoldsreturns: (X,Y,x,y) features namesOfTestInstances
 
 
 ## outputs
