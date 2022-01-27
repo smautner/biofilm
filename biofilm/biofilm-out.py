@@ -3,7 +3,6 @@ import numpy as np
 from lmz import *
 from sklearn.metrics import f1_score
 import matplotlib
-matplotlib.use('module://matplotlib-sixel')
 import matplotlib.pyplot as plt
 ##################
 # the purpose oof this is to draw a precision recall curve
