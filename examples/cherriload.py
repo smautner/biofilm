@@ -70,7 +70,7 @@ def read(name):
     #print(f" {X.shape} {y.shape}")
 
     namez = tools.loadfile(name+'.index.dmp')
-    return X,y, namez + Range(X.shape[1] - len(namez)), np.array(range(X.shape[0]))
+    return X.todense(),y, namez + Range(X.shape[1] - len(namez)), np.array(range(X.shape[0]))
 
 
 

@@ -42,6 +42,8 @@ def optimize(X,Y,x,y, args):
             metric = autosklearn.metrics.f1,
             max_models_on_disc = 1
             )
+
+    print('optimization datatype:',type(X))
     estim.fit(X,Y)
     #import code
     #code.interact(local=dict(globals(), **locals()))

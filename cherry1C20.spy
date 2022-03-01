@@ -8,7 +8,7 @@ dataset =  sys.argv[2]
 this is a copy of 1c20 to see if we can quickly run it
 and share the model files...
 '''
-`export PYTHONHASHSEED=31337`
+`export PYTHONHASHSEED=31337
 
 
 fnames = [
@@ -24,7 +24,7 @@ fnames = [
 
 if dataset == 'all':
     for target in fnames:
-        `shellpy test1C20.spy {what} {target}`
+        `shellpy cherry1C20.spy {what} {target}
     exit()
 
 
@@ -52,7 +52,7 @@ if what == 'selectft':
     `mkdir -p testb71/features`
     loaddata += '--subsample 20000 '
     out = f'testb71/features/{dataset}'
-    `python -m biofilm.biofilm-features {loaddata} --method forest --out {out}`
+    `python -m biofilm.biofilm-features {loaddata} --method forest --out {out}
 
 
 '''
@@ -64,7 +64,9 @@ if what == 'optimize':
     # TODO python -m biofilm.biofilm-optimize6 should work
     #python biofilm/biofilm-optimize6.py  @(loaddata)\
     out  = f'testb71/optimized/{dataset}'
-    `python -m biofilm.biofilm-optimize6 {loaddata} --out {out}  --preprocess True --n_jobs 30 --time 1000`
+    z = `python -m biofilm.biofilm-optimize6 {loaddata} --out {out}  --preprocess True \
+            --n_jobs 30 --time 600
+    print(z)
 
 
 
@@ -81,14 +83,14 @@ if what == 'plot1':
       use all 5 models to crossvalidate over all instances to compare them...
 '''
 
+
 if what == 'runcv':
-    # rum models
     loaddata += f'--foldselect {{1}} --featurefile testb71/features/{dataset}'
-    # TODO python -m biofilm.biofilm-cv
     `mkdir -p testb71/crossval`
     py = `which python`
     seq = `seq 0 4`
-    `parallel -j 5 --joblog delme.log $(which python) biofilm/biofilm-cv.py {loaddata} --model testb71/optimized/{dataset}.model --out testb71/crossval/{dataset}_{{1}}.cv ::: $(seq 0 4)`
+    `parallel -j 5 --joblog delme.log $(which python) -m biofilm/biofilm-cv {loaddata}\
+            --model testb71/optimized/{dataset}.model --out testb71/crossval/{dataset}_{{1}}.cv ::: $(seq 0 4)`
 
 
 
