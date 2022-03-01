@@ -1,5 +1,4 @@
 import matplotlib
-matplotlib.use('module://matplotlib-sixel')
 import dirtyopts
 import numpy as np
 from lmz import *

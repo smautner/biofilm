@@ -34,7 +34,7 @@ if what == 'makedata':
     `mkdir -p testb71/data/`
     # TODO change imoprt blabla to biofilm.examples.cherriload
     import examples.cherriload  as cl
-    p = "/home/ubuntu/data/cherry/"+dataset
+    p = "~/data/cherry/"+dataset
     d1 = p+'neg.csv'
     d2 = p+"pos.csv"
     cl.convert(d1,d2,f'testb71/data/{dataset}', graphfeatures=True)
@@ -44,13 +44,13 @@ if what == 'makedata':
 we can do it in a fancy way, by providing a python file that has a
 read(path) function. as demonstrated in examples/cherriload.py
 '''
-loaddata = f'--infile testb71/data/{dataset} --loader examples/cherriload.py '
+loaddata = f'--infile testb71/data/{dataset}'
 
 
 
 if what == 'selectft':
     `mkdir -p testb71/features`
-    loaddata += '--subsample 20000 '
+    loaddata += ' --subsample 20000 '
     out = f'testb71/features/{dataset}'
     `python -m biofilm.biofilm-features {loaddata} --method forest --out {out}
 
