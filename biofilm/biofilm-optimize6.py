@@ -13,6 +13,7 @@ optidoc='''
 --out str jsongoeshere
 --n_jobs int 1
 --time int 3600
+--memoryMBthread int 8000
 --randinit int 1337  # should be the same as the one in data.py
 --preprocess bool False
 #--metric str f1 assert f1 auc   TODO
@@ -37,7 +38,7 @@ def optimize(X,Y,x,y, args):
             n_jobs = args.n_jobs,
             ensemble_size = 1,
             include = include,
-            memory_limit = int(240000/30),
+            memory_limit = args.memoryMBthread,
             time_left_for_this_task = args.time,
             metric = autosklearn.metrics.f1,
             max_models_on_disc = 1
