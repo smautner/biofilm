@@ -31,13 +31,13 @@ if dataset == 'all':
 # ok lets make some DATA
 if what == 'makedata':
     print(f'makedata {dataset}')
-    `mkdir -p testb71/data/`
+    `mkdir -p testb81/data/`
     # TODO change imoprt blabla to biofilm.examples.cherriload
     import examples.cherriload  as cl
     p = "~/data/cherry/"+dataset
     d1 = p+'neg.csv'
     d2 = p+"pos.csv"
-    cl.convert(d1,d2,f'testb71/data/{dataset}', graphfeatures=True)
+    cl.convert(d1,d2,f'testb81/data/{dataset}', graphfeatures=True)
 
 '''
 1. load data
@@ -89,8 +89,7 @@ if what == 'runcv':
     `mkdir -p testb71/crossval`
     py = `which python`
     seq = `seq 0 4`
-    `parallel -j 5 --joblog delme.log $(which python) -m biofilm/biofilm-cv {loaddata}\
-            --model testb71/optimized/{dataset}.model --out testb71/crossval/{dataset}_{{1}}.cv ::: $(seq 0 4)`
+    `parallel -j 5 --joblog delme.log $(which python) -m biofilm/biofilm-cv {loaddata} --model testb71/optimized/{dataset}.model --out testb71/crossval/{dataset}_{{1}}.cv ::: $(seq 0 4)`
 
 
 

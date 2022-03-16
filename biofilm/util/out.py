@@ -27,6 +27,10 @@ def get_params2(ask):
     '''
     #ask = ask.get_models_with_weights()[0][1]
     args=str(ask.steps[-1][1].choice.__dict__)
+    try:
+        args+='\n\n\n\n '+ str(ask.steps[-2][1].choice.__dict__) # not sure if a choice is required
+    except:
+        args+='\n failed to get preprocessing info'
     return args
 
 def report(model, outputname, quiet=False, predict_train=False,additionaloutput={}):
@@ -43,7 +47,9 @@ def report(model, outputname, quiet=False, predict_train=False,additionaloutput=
     data, fea, ins = datautil.getfold()
     dataargs = datautil.getargs()
     params = get_params2(pipeline)
+
     if predict_train or data[2].shape[0] ==0:
+        print("eval on train (becuse a flag was set or the test variables are empty")
         X = data[0]
         y = data[1]
     else:

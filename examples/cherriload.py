@@ -64,18 +64,6 @@ def convert(negname, posname, outname, graphfeatures=True):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 def makedata_test():
     p = "/home/ubuntu/repos/RNA_RNA_binding_evaluation/test_data/training/test_context_feat/"
     d1 = p+'test_con300_neg.csv'
