@@ -49,7 +49,7 @@ def report(model, outputname, quiet=False, predict_train=False,additionaloutput=
     params = get_params2(pipeline)
 
     if predict_train or data[2].shape[0] ==0:
-        print("eval on train (becuse a flag was set or the test variables are empty")
+        print("INFO: there is no test set provided so we eval on train. this may be unintendet.")
         X = data[0]
         y = data[1]
     else:

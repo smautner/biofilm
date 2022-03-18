@@ -44,14 +44,14 @@ if what == 'makedata':
 we can do it in a fancy way, by providing a python file that has a
 read(path) function. as demonstrated in examples/cherriload.py
 '''
-loaddata = f'--infile testb71/data/{dataset}'
+loaddata = f'--infile testb81/data/{dataset}'
 
 
 
 if what == 'selectft':
-    `mkdir -p testb71/features`
+    `mkdir -p testb81/features`
     loaddata += ' --subsample 20000 '
-    out = f'testb71/features/{dataset}'
+    out = f'testb81/features/{dataset}'
     `python -m biofilm.biofilm-features {loaddata} --method forest --out {out}
 
 
@@ -59,13 +59,13 @@ if what == 'selectft':
 2. LETZ OPTYIMIZE
 '''
 if what == 'optimize':
-    `mkdir -p testb71/optimized`
-    loaddata += f'--folds 0 --subsample 10000 --featurefile testb71/features/{dataset}'
+    `mkdir -p testb81/optimized`
+    loaddata += f' --folds 0 --featurefile testb81/features/{dataset}'
     # TODO python -m biofilm.biofilm-optimize6 should work
     #python biofilm/biofilm-optimize6.py  @(loaddata)\
-    out  = f'testb71/optimized/{dataset}'
+    out  = f'testb81/optimized/{dataset}'
     z = `python -m biofilm.biofilm-optimize6 {loaddata} --out {out}  --preprocess True \
-            --n_jobs 30 --time 600
+            --n_jobs 30 --time 50000
     print(z)
 
 
@@ -85,25 +85,19 @@ if what == 'plot1':
 
 
 if what == 'runcv':
-    loaddata += f'--foldselect {{1}} --featurefile testb71/features/{dataset}'
-    `mkdir -p testb71/crossval`
-    py = `which python`
+    loaddata += f'--foldselect {{1}} --featurefile testb81/features/{dataset}'
+    `mkdir -p testb81/crossval`
     seq = `seq 0 4`
-    `parallel -j 5 --joblog delme.log $(which python) -m biofilm/biofilm-cv {loaddata} --model testb71/optimized/{dataset}.model --out testb71/crossval/{dataset}_{{1}}.cv ::: $(seq 0 4)`
+    `parallel -j 5 --joblog delme.log $(which python) -m biofilm/biofilm-cv {loaddata} --model testb81/optimized/{dataset}.model --out testb81/crossval/{dataset}_{{1}}.cv ::: $(seq 0 4)`
 
 
 
-
-
-
-
-"""
 if what == "refit":
-    mkdir -p testb71/refit
-    loaddata += f'--featurefile testb71/features/{dataset}'.split()
-    python -m biofilm.biofilm-cv --folds 0 @(loaddata)\
-        --model @('testb71/optimized/%s.model' % dataset)\
-        --out @('testb71/refit/%s.model' % dataset)
+    `mkdir -p testb81/refit
+    loaddata += f' --featurefile testb81/features/{dataset}'
+    models = 'testb81/optimized/%s.model' % dataset
+    out = 'testb81/refit/%s.model' % dataset
+    `python -m biofilm.biofilm-cv --folds 0 {loaddata} --model {models} --out {out}
 
 
 if what == "crossmodel":
@@ -111,38 +105,25 @@ if what == "crossmodel":
     1.    load the {dataset}
     2.    run the model against it
     '''
-    mkdir -p testb71/crossmodel
+    `mkdir -p testb81/crossmodel
     for model in fnames:
-        loaddata_mod = loaddata+f'--featurefile testb71/features/{model}'.split()
+        loaddata_mod = loaddata+f'--featurefile testb81/features/{model}'.split()
         print(loaddata_mod)
         if model != dataset:
-            python biofilm/util/out.py --folds 0 @(loaddata_mod)\
-            --model @("testb71/refit/%s.model.model" % model) --out @('testb71/crossmodel/%s%s' % (model,dataset))
+            inmodel = "testb81/refit/%s.model.model" % model
+            out = 'testb81/crossmodel/%s%s' % (model,dataset)
+            `python biofilm/util/out.py --folds 0 {loaddata_mod} --model {inmodel} --out {out}
 
-
-
-
-if what == 'trueplot':
+if what == "tspecial":
     '''
-    this is a leftover from the original scropt;
-    i might want t o make it run with this in the future
+        use humanrri to predict on humanrbp
     '''
-    import matplotlib
-    matplotlib.use('module://matplotlib-sixel')
-    import matplotlib.pyplot as plt
-    import dill
-    import pprint
-    loadfile = lambda filename: dill.load(open(filename, 'rb'))
-    for i in range(0,5):
-        print(f"########### {i} ############")
-        filez =  glob(f'{folder}/{i}*.last.csv')
-        python biofilm/biofilm-out.py --infiles @(filez)
-        d = loadfile(filez[0].split("_")[0]) # will load the model file
-        print("self-score: ",d['score'])
-        print("PARAMETERS")
-        pprint.pprint(d['params'])
-        if 'scorehistory' in d:
-            plt.plot(d['scorehistory'])
-            plt.show(); plt.close()
+    `mkdir -p testb81/crossmodel
+    model = 'paris_human_RRI_'
+    inmodel = f"testb81/refit/{model}.model.model"
+    targetdata = "paris_human_RBPs_"
+    loaddata_mod = f'--infile testb81/data/paris_human_RBPs_ --featurefile testb81/features/{model}'
+    out = 'testb81/crossmodel/%s%s' % (model,targetdata)
+    print("FORK")
+    print(f"python biofilm/util/out.py --folds 0 {loaddata_mod} --model {inmodel} --out {out}")
 
-"""
