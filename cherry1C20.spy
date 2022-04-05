@@ -31,27 +31,27 @@ if dataset == 'all':
 # ok lets make some DATA
 if what == 'makedata':
     print(f'makedata {dataset}')
-    `mkdir -p testb81/data/`
+    `mkdir -p testb85/data/`
     # TODO change imoprt blabla to biofilm.examples.cherriload
     import examples.cherriload  as cl
     p = "~/data/cherry/"+dataset
     d1 = p+'neg.csv'
     d2 = p+"pos.csv"
-    cl.convert(d1,d2,f'testb81/data/{dataset}', graphfeatures=True)
+    cl.convert(d1,d2,f'testb85/data/{dataset}', graphfeatures=True)
 
 '''
 1. load data
 we can do it in a fancy way, by providing a python file that has a
 read(path) function. as demonstrated in examples/cherriload.py
 '''
-loaddata = f'--infile testb81/data/{dataset}'
+loaddata = f'--infile testb85/data/{dataset}'
 
 
 
 if what == 'selectft':
-    `mkdir -p testb81/features`
+    `mkdir -p testb85/features`
     loaddata += ' --subsample 20000 '
-    out = f'testb81/features/{dataset}'
+    out = f'testb85/features/{dataset}'
     `python -m biofilm.biofilm-features {loaddata} --method forest --out {out}
 
 
@@ -59,12 +59,13 @@ if what == 'selectft':
 2. LETZ OPTYIMIZE
 '''
 if what == 'optimize':
-    `mkdir -p testb81/optimized`
-    loaddata += f' --folds 0 --featurefile testb81/features/{dataset}'
+    `mkdir -p testb85/optimized`
+    loaddata += f' --folds 0 --featurefile testb85/features/{dataset}'
     # TODO python -m biofilm.biofilm-optimize6 should work
     #python biofilm/biofilm-optimize6.py  @(loaddata)\
-    out  = f'testb81/optimized/{dataset}'
+    out  = f'testb85/optimized/{dataset}'
     z = `python -m biofilm.biofilm-optimize6 {loaddata} --out {out}  --preprocess True \
+            --methods  extra_trees passive_aggressive random_forest sgd gradient_boosting mlp\
             --n_jobs 30 --time 50000
     print(z)
 
@@ -85,18 +86,18 @@ if what == 'plot1':
 
 
 if what == 'runcv':
-    loaddata += f'--foldselect {{1}} --featurefile testb81/features/{dataset}'
-    `mkdir -p testb81/crossval`
+    loaddata += f'--foldselect {{1}} --featurefile testb85/features/{dataset}'
+    `mkdir -p testb85/crossval`
     seq = `seq 0 4`
-    `parallel -j 5 --joblog delme.log $(which python) -m biofilm/biofilm-cv {loaddata} --model testb81/optimized/{dataset}.model --out testb81/crossval/{dataset}_{{1}}.cv ::: $(seq 0 4)`
+    `parallel -j 5 --joblog delme.log $(which python) -m biofilm/biofilm-cv {loaddata} --model testb85/optimized/{dataset}.model --out testb81/crossval/{dataset}_{{1}}.cv ::: $(seq 0 4)`
 
 
 
 if what == "refit":
-    `mkdir -p testb81/refit
-    loaddata += f' --featurefile testb81/features/{dataset}'
-    models = 'testb81/optimized/%s.model' % dataset
-    out = 'testb81/refit/%s.model' % dataset
+    `mkdir -p testb85/refit
+    loaddata += f' --featurefile testb85/features/{dataset}'
+    models = 'testb85/optimized/%s.model' % dataset
+    out = 'testb85/refit/%s.model' % dataset
     `python -m biofilm.biofilm-cv --folds 0 {loaddata} --model {models} --out {out}
 
 
@@ -105,13 +106,13 @@ if what == "crossmodel":
     1.    load the {dataset}
     2.    run the model against it
     '''
-    `mkdir -p testb81/crossmodel
+    `mkdir -p testb85/crossmodel
     for model in fnames:
-        loaddata_mod = loaddata+f'--featurefile testb81/features/{model}'.split()
+        loaddata_mod = loaddata+f'--featurefile testb85/features/{model}'.split()
         print(loaddata_mod)
         if model != dataset:
-            inmodel = "testb81/refit/%s.model.model" % model
-            out = 'testb81/crossmodel/%s%s' % (model,dataset)
+            inmodel = "testb85/refit/%s.model.model" % model
+            out = 'testb85/crossmodel/%s%s' % (model,dataset)
             `python biofilm/util/out.py --folds 0 {loaddata_mod} --model {inmodel} --out {out}
 
 if what == "tspecial":

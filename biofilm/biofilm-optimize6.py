@@ -9,7 +9,7 @@ from autosklearn.classification import AutoSklearnClassifier as ASK1
 import autosklearn.metrics
 
 optidoc='''
---method str any  'extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp'
+--methods str+ any  'extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp'
 --out str jsongoeshere
 --n_jobs int 1
 --time int 3600
@@ -21,15 +21,17 @@ optidoc='''
 
 def optimize(X,Y,x,y, args):
 
-    if args.method == 'any':
-        estis =  ['extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp']
+    if args.methods[0] == 'any':
+        estis =  None #['extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp']
     else:
-        estis = [args.method]
+        estis = args.methods
 
 
     #include_estimators = estis,
     #include_preprocessors = ["no_preprocessing"] if not args.preprocess else None,
-    include = {}
+
+    include = {'classifier': estis} if estis else {}
+    print("ALLGOOD:", include)
     if not args.preprocess:
             include['feature_preprocessor'] =  ["no_preprocessing"]
             #include['data_preprocessor']     =  ['NoPreprocessing']

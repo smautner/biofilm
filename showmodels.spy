@@ -1,0 +1,13 @@
+
+
+
+from ubergauss import tools as t
+import sys
+folder = sys.argv[1]
+z= `ls {folder}/*.model`
+
+for model in z:
+    print("#"*80)
+    print("#"*80)
+    print(model)
+    print(t.loadfile(model)['params'])
