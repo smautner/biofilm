@@ -86,10 +86,10 @@ if what == 'plot1':
 
 
 if what == 'runcv':
-    loaddata += f'--foldselect {{1}} --featurefile testb85/features/{dataset}'
+    loaddata += f' --foldselect {{1}} --featurefile testb85/features/{dataset} '
     `mkdir -p testb85/crossval`
     seq = `seq 0 4`
-    `parallel -j 5 --joblog delme.log $(which python) -m biofilm/biofilm-cv {loaddata} --model testb85/optimized/{dataset}.model --out testb81/crossval/{dataset}_{{1}}.cv ::: $(seq 0 4)`
+    `parallel -j 5 --joblog delme.log $(which python) -m biofilm.biofilm-cv {loaddata} --model testb85/optimized/{dataset}.model --out testb85/crossval/{dataset}_{{1}}.cv ::: $(seq 0 4)`
 
 
 
@@ -119,12 +119,56 @@ if what == "tspecial":
     '''
         use humanrri to predict on humanrbp
     '''
-    `mkdir -p testb81/crossmodel
-    model = 'paris_human_RRI_'
-    inmodel = f"testb81/refit/{model}.model.model"
-    targetdata = "paris_human_RBPs_"
-    loaddata_mod = f'--infile testb81/data/paris_human_RBPs_ --featurefile testb81/features/{model}'
-    out = 'testb81/crossmodel/%s%s' % (model,targetdata)
+    `mkdir -p testb85/crossmodel
+    model = 'paris_mouse_RRI_'
+    targetdata = "paris_human_RRI_"
+
+    inmodel = f"testb85/refit/{model}.model.model"
+    loaddata_data = f'--infile testb85/data/{targetdata} --featurefile testb85/features/{model}'
+    out = 'testb85/crossmodel/%s%s' % (model,targetdata)
     print("FORK")
-    print(f"python biofilm/util/out.py --folds 0 {loaddata_mod} --model {inmodel} --out {out}")
+    print(f"python biofilm/util/out.py --folds 0 {loaddata_data} --model {inmodel} --out {out}")
+
+
+
+from sklearn.metrics import f1_score
+import numpy as np
+def getf1(a,b,where):
+    if a == b:
+        paths = [f'{where}/crossval/{a}{i}.cv.csv' for i in range(5)]
+    else:
+        paths = [f'{where}/crossmodel/{b}{a}.csv']
+    trv, pred = [],[]
+    for file in paths:
+        re = np.genfromtxt(file,skip_header = 1, delimiter=',', dtype = np.int32)
+        trv+=list(re[:,1])
+        pred+=list(re[:,2])
+
+    #print(trv)
+    return f1_score(trv,pred)
+
+if what  == 'f1':
+    where = dataset
+    np.set_printoptions(precision = 2)
+
+    # this is the order in the paper
+    fnames = [
+    'full_',
+    'full_human_',
+    'paris_human_RBPs_',
+    'paris_human_RRI_',
+    'paris_mouse_RRI_',
+    'paris_splash_human_RRI_',
+    'splash_human_RRI_'
+    ]
+
+    l = len(fnames)
+    m = np.zeros((l,l))
+    for i in range(l):
+        for j in range(l):
+            m[i,j]= getf1(fnames[i], fnames[j],where)
+    print(m)
+
+
+
 
