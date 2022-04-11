@@ -31,13 +31,14 @@ if dataset == 'all':
 # ok lets make some DATA
 if what == 'makedata':
     print(f'makedata {dataset}')
-    `mkdir -p testb85/data/`
+    fld = 'testb86'
+    `mkdir -p {fld}/data/`
     # TODO change imoprt blabla to biofilm.examples.cherriload
     import examples.cherriload  as cl
     p = "~/data/cherry/"+dataset
     d1 = p+'neg.csv'
     d2 = p+"pos.csv"
-    cl.convert(d1,d2,f'testb85/data/{dataset}', graphfeatures=True)
+    cl.convert(d1,d2,f'{fld}/data/{dataset}', graphfeatures=True)
 
 '''
 1. load data
@@ -117,32 +118,81 @@ if what == "crossmodel":
 
 if what == "tspecial":
     '''
-        use humanrri to predict on humanrbp
+        load from cherry
+        for x in any/speciffic list:
+            train mouse
+            predict mouse, human
     '''
-    `mkdir -p testb85/crossmodel
-    model = 'paris_mouse_RRI_'
-    targetdata = "paris_human_RRI_"
+    fld = 'testb86'
+    human, mouse = 'paris_human_RRI_', 'paris_mouse_RRI_'
+    loaddata = f'--infile {fld}/data/{mouse} --subsample 20000'
 
-    inmodel = f"testb85/refit/{model}.model.model"
-    loaddata_data = f'--infile testb85/data/{targetdata} --featurefile testb85/features/{model}'
-    out = 'testb85/crossmodel/%s%s' % (model,targetdata)
-    print("FORK")
-    print(f"python biofilm/util/out.py --folds 0 {loaddata_data} --model {inmodel} --out {out}")
 
+    # features
+    if False:
+        `mkdir -p {fld}
+        `python -m biofilm.biofilm-features {loaddata} --method forest --out {fld}/mouseft
+
+    # train mouse twice
+
+    loaddata = f'--infile {fld}/data/{mouse} --featurefile {fld}/mouseft'
+
+    if False:
+        # restricted model list
+        `python -m biofilm.biofilm-optimize6 {loaddata} --out {fld}/restricted  --preprocess True \
+                --methods  extra_trees passive_aggressive random_forest sgd gradient_boosting mlp\
+                --n_jobs 30 --time 30000
+        # any model
+        `python -m biofilm.biofilm-optimize6 {loaddata} --out {fld}/free  --preprocess True \
+                --n_jobs 30 --time 30000
+
+
+        # refit
+        print("refitting:")
+        `python -m biofilm.biofilm-cv --folds 0 {loaddata} --model {fld}/free.model --out {fld}/free2
+        `python -m biofilm.biofilm-cv --folds 0 {loaddata} --model {fld}/restricted.model --out {fld}/restricted2
+
+        # cv
+        loaddata += f' --foldselect {{1}}'
+        `mkdir -p {fld}/cv`
+        seq = `seq 0 4`
+        `parallel -j 5 --joblog delme.log $(which python) -m biofilm.biofilm-cv {loaddata} --model {fld}/{{2}}.model --out {fld}/cv/{{2}}_{{1}}.cv ::: $(seq 0 4) ::: free restricted
+
+        # IS IT POSSIBLE THAT ONE DIED IN CV? AM I CATCHING THOSE ERRORS?
+        # I SHOULD PRINT CV OUTPUT>>> IS SHELLPY BLOCKING OUTPUT? MULLLA
+        # ALSO REFIT DUMPOS MDOELS DIRECTLY THIS SHOULDBE FIXED OOO
+
+        # eval
+        for model in ['free','restricted']:
+                loaddata = f'--infile {fld}/data/{human} --featurefile {fld}/mouseft'
+                `python biofilm/util/out.py --folds 0 {loaddata} --model {fld}/{model}2.model --out {fld}/{model}{human}.done
+
+
+    loaddata = f' --infile {fld}/data/{mouse} --foldselect {{1}} --featurefile {fld}/mouseft '
+    `mkdir -p {fld}/crossval`
+    `parallel -j 32 --joblog delme.log $(which python) -m biofilm.biofilm-cv {loaddata} --model {fld}/{{2}}.model --out {fld}/crossval/{{2}}_{{1}}.cv ::: $(seq 0 4) ::: free restricted`
+
+
+    # todo: call readCSV :)
 
 
 from sklearn.metrics import f1_score
 import numpy as np
-def getf1(a,b,where):
-    if a == b:
-        paths = [f'{where}/crossval/{a}{i}.cv.csv' for i in range(5)]
-    else:
-        paths = [f'{where}/crossmodel/{b}{a}.csv']
+def readcsv(paths):
     trv, pred = [],[]
     for file in paths:
         re = np.genfromtxt(file,skip_header = 1, delimiter=',', dtype = np.int32)
         trv+=list(re[:,1])
         pred+=list(re[:,2])
+    return trv, pred
+
+def getf1(a,b,where):
+    if a == b:
+        paths = [f'{where}/crossval/{a}{i}.cv.csv' for i in range(5)]
+    else:
+        paths = [f'{where}/crossmodel/{b}{a}.csv']
+
+    trv,pred = readcsv(paths)
 
     #print(trv)
     return f1_score(trv,pred)
