@@ -19,6 +19,13 @@ optidoc='''
 #--metric str f1 assert f1 auc   TODO
 '''
 
+'''
+this gives all the calssifiers:
+import autosklearn.pipeline.components.classification as cls
+cls._classifiers.keys()
+'adaboost', 'bernoulli_nb', 'decision_tree', 'extra_trees', 'gaussian_nb', 'gradient_boosting', 'k_nearest_neighbors', 'lda', 'liblinear_svc', 'libsvm_svc', 'mlp', 'multinomial_nb', 'passive_aggressive', 'qda', 'random_forest', 'sgd'
+'''
+
 def optimize(X,Y,x,y, args):
 
     if args.methods[0] == 'any':
