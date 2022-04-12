@@ -116,6 +116,18 @@ if what == "crossmodel":
             out = 'testb85/crossmodel/%s%s' % (model,dataset)
             `python biofilm/util/out.py --folds 0 {loaddata_mod} --model {inmodel} --out {out}
 
+from sklearn.metrics import f1_score
+import numpy as np
+import glob
+def readcsv(paths):
+    trv, pred = [],[]
+    for file in paths:
+        re = np.genfromtxt(file,skip_header = 1, delimiter=',', dtype = np.int32)
+        trv+=list(re[:,1])
+        pred+=list(re[:,2])
+    return trv, pred
+
+
 if what == "tspecial":
     '''
         load from cherry
@@ -168,23 +180,16 @@ if what == "tspecial":
                 `python biofilm/util/out.py --folds 0 {loaddata} --model {fld}/{model}2.model --out {fld}/{model}{human}.done
 
 
-    loaddata = f' --infile {fld}/data/{mouse} --foldselect {{1}} --featurefile {fld}/mouseft '
-    `mkdir -p {fld}/crossval`
-    `parallel -j 32 --joblog delme.log $(which python) -m biofilm.biofilm-cv {loaddata} --model {fld}/{{2}}.model --out {fld}/crossval/{{2}}_{{1}}.cv ::: $(seq 0 4) ::: free restricted`
+        loaddata = f' --infile {fld}/data/{mouse} --foldselect {{1}} --featurefile {fld}/mouseft '
+        `mkdir -p {fld}/crossval`
+        `parallel -j 32 --joblog delme.log $(which python) -m biofilm.biofilm-cv {loaddata}  --model {fld}/{{2}}.model --out {fld}/crossval/{{2}}_{{1}}.cv ::: $(seq 0 4) ::: free restricted`
 
 
     # todo: call readCSV :)
-
-
-from sklearn.metrics import f1_score
-import numpy as np
-def readcsv(paths):
-    trv, pred = [],[]
-    for file in paths:
-        re = np.genfromtxt(file,skip_header = 1, delimiter=',', dtype = np.int32)
-        trv+=list(re[:,1])
-        pred+=list(re[:,2])
-    return trv, pred
+    print(f" on human, FREEEE {f1_score(*readcsv(['testb86/freeparis_human_RRI_.done.csv']))}")
+    print(f" on human, RESTRI {f1_score(*readcsv(['testb86/restrictedparis_human_RRI_.done.csv']))}")
+    print(f" on MOUSE, FREEEE {f1_score(*readcsv(glob.glob('testb86/cv/free*.csv')))}")
+    print(f" on MOUSE, RESTRI {f1_score(*readcsv(glob.glob('testb86/cv/rest*.csv')))}")
 
 def getf1(a,b,where):
     if a == b:

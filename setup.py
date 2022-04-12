@@ -98,7 +98,7 @@ setup(
     version=get_version(),
     author='Stefan Mautner',
     author_email='myl4stn4m3stef@gmail.com',
-    packages=[packname, 'biofilm.util','biofilm.binsearch'],
+    packages=[packname, 'biofilm.util','biofilm.binsearch','biofilm.algo'],
     python_requires='>=3.8',
     scripts=[ ],
     include_package_data=True,
