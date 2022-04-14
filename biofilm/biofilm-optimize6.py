@@ -81,10 +81,13 @@ def main():
     if data[0].shape[1] < 100:
         print("SELECTED FEATURES: ", end='')
         pipeline = model.get_models_with_weights()[0][1]
-        if type(pipeline.steps[2][1].choice.preprocessor) == str:
-            print("all")
-        else:
-            print('\n',pipeline.steps[2][1].choice.preprocessor.get_support())
+        try:
+            if type(pipeline.steps[2][1].choice.preprocessor) == str:
+                print("all")
+            else:
+                print('\n',pipeline.steps[2][1].choice.preprocessor.get_support())
+        except:
+            pass
 
 
 if __name__ == "__main__":
