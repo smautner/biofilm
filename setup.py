@@ -113,7 +113,7 @@ setup(
         'lmz==0.1.12',
         'dirtyopts==0.0.18',
         'numpy >= 1.22.0',
-        'structout==0.1.43',
+        'structout==0.1.44',
         'auto-sklearn == 0.14.2',
         "eden-kernel==0.3.1348"
         ],
