@@ -100,7 +100,6 @@ setup(
     author_email='myl4stn4m3stef@gmail.com',
     packages=[packname, 'biofilm.util','biofilm.binsearch','biofilm.algo'],
     python_requires='>=3.8',
-    scripts=[ ],
     include_package_data=True,
     package_data={},
     url='https://github.com/smautner/biofilm',
@@ -110,14 +109,13 @@ setup(
     #long_description=open('README.md').read(),
     install_requires=[
         'scikit-learn >= 0.24.2',
-        'ubergauss==0.0.39',
-        'lmz==0.1.11',
-        'dirtyopts==0.0.17',
+        'ubergauss==0.0.43',
+        'lmz==0.1.12',
+        'dirtyopts==0.0.18',
         'numpy >= 1.22.0',
-        'structout==0.1.41',
+        'structout==0.1.43',
         'auto-sklearn == 0.14.2',
-        'shellpy >= 0.5.1',
-        "eden-kernel==0.3.1346"
+        "eden-kernel==0.3.1348"
         ],
     #entry_points = { 'console_scripts': ['biofilmop=biofilm.biofilm-optimize:main','biofilmft=biofilm.biofilm-features:main'] },
     cmdclass={'sdist': sdist, 'install': install}
