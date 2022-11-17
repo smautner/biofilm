@@ -16,7 +16,7 @@ optidoc='''
 --memoryMBthread int 8000
 --randinit int 1337  # should be the same as the one in data.py
 --preprocess bool False
---tmp_folder str ''
+--tmp_folder str
 #--metric str f1 assert f1 auc   TODO
 '''
 
