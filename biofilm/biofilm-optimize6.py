@@ -16,6 +16,7 @@ optidoc='''
 --memoryMBthread int 8000
 --randinit int 1337  # should be the same as the one in data.py
 --preprocess bool False
+--tmp_folder str ''
 #--metric str f1 assert f1 auc   TODO
 '''
 
@@ -50,7 +51,8 @@ def optimize(X,Y,x,y, args):
             memory_limit = args.memoryMBthread,
             time_left_for_this_task = args.time,
             metric = autosklearn.metrics.f1,
-            max_models_on_disc = 1
+            max_models_on_disc = 1,
+            tmp_folder = args.tmp_folder or None
             )
 
     print('optimization datatype:',type(X))
