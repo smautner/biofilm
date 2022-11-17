@@ -114,9 +114,9 @@ setup(
         'dirtyopts==0.0.18',
         'numpy >= 1.22.0',
         'structout==0.1.44',
-        'auto-sklearn == 0.14.2',
+        'auto-sklearn == 0.15',
         "eden-kernel==0.3.1348",
-        "pynisher==0.6.4" # automl 14.2 doesnt pick the right versionhere..
+        "pynisher<=.7" # automl 14.2 doesnt pick the right versionhere..
         ],
     #entry_points = { 'console_scripts': ['biofilmop=biofilm.biofilm-optimize:main','biofilmft=biofilm.biofilm-features:main'] },
     cmdclass={'sdist': sdist, 'install': install}
