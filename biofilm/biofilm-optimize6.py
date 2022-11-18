@@ -40,6 +40,7 @@ def optimize(X,Y,x,y, args):
 
     include = {'classifier': estis} if estis else {}
     print("ALLGOOD:", include)
+    print('test: config meta learining:')
     if not args.preprocess:
             include['feature_preprocessor'] =  ["no_preprocessing"]
             #include['data_preprocessor']     =  ['NoPreprocessing']
@@ -48,6 +49,7 @@ def optimize(X,Y,x,y, args):
             n_jobs = args.n_jobs,
             ensemble_size = 1,
             include = include,
+            initial_configurations_via_metalearning=0,
             memory_limit = args.memoryMBthread,
             time_left_for_this_task = args.time,
             metric = autosklearn.metrics.f1,
