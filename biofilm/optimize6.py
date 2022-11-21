@@ -52,7 +52,8 @@ def optimize(X,Y,x,y, args):
             time_left_for_this_task = args.time,
             metric = autosklearn.metrics.f1,
             max_models_on_disc = 1,
-            tmp_folder = args.tmp_folder or None
+            tmp_folder = args.tmp_folder or None,
+            initial_configurations_via_metalearning=0 # autosklearn thros warnings otherwise
             )
 
     print('OPTIMIZATION DATATYPE:',type(x))
