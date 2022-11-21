@@ -50,8 +50,8 @@ loaddata = f'--infile NOG/data/{dataset} --loader examples/cherriload.py '.split
 if what == 'optimize':
     mkdir -p NOG/optimized
     loaddata += '--folds 0 --subsample 10000'.split()
-    # TODO python -m biofilm.biofilm-optimize6 should work
-    python biofilm/biofilm-optimize6.py  @(loaddata)\
+    # TODO python -m biofilm.optimize6 should work
+    python biofilm/optimize6.py  @(loaddata)\
         --out @(f'NOG/optimized/{dataset}') --preprocess True --n_jobs 30 --time 28800
 
 

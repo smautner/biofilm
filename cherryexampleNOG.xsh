@@ -46,12 +46,12 @@ read(path) function. as demonstrated in examples/cherriload.py
 '''
 if what == 'runopti':
     loaddata += '--foldselect {1}'.split()
-    parallel -j 5 --joblog opti.log $(which python) biofilm/biofilm-optimize6.py  @(loaddata)\
+    parallel -j 5 --joblog opti.log $(which python) biofilm/optimize6.py  @(loaddata)\
         --out @(folder+'/{1}.optimized') --n_jobs 6 --time 36000 ::: $(seq 0 4)
 
 if what == 'runopti2':
     loaddata += '--folds 0'.split()
-    python biofilm/biofilm-optimize6.py  @(loaddata)\
+    python biofilm/optimize6.py  @(loaddata)\
         --out @(folder+'/optimized') --preprocess True --n_jobs 30 --time 180 --subsample 1000
 
 '''

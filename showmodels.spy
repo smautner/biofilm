@@ -3,11 +3,34 @@
 
 from ubergauss import tools as t
 import sys
-folder = sys.argv[1]
-z= `ls {folder}/*.model`
 
-for model in z:
-    print("#"*80)
-    print("#"*80)
-    print(model)
-    print(t.loadfile(model)['params'])
+
+if False: # print model params ;;
+    folder = sys.argv[1]
+    z= `ls {folder}/*.model`
+
+    for model in z:
+        print("#"*80)
+        print("#"*80)
+        print(model)
+        print(t.loadfile(model)['params'])
+
+
+import matplotlib.pyplot as plt
+if True:
+    folder = sys.argv[1]
+    z= `ls {folder}/features/*.npz`
+    import numpy as np
+    for e in z:
+        print(e)
+        g = np.load(e)['arr_1']
+        ba = np.load(e)['arr_0']
+        ba = g[ba]
+
+        #g= np.log((g+1))
+        plt.hist(g,bins=50, log=True)
+
+        plt.title(f'{min(ba)}')
+        plt.savefig(f"{e}.png")
+        plt.close()
+

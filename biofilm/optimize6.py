@@ -55,9 +55,9 @@ def optimize(X,Y,x,y, args):
             tmp_folder = args.tmp_folder or None
             )
 
-    print('optimization datatype:',type(X))
-    estim.fit(X,Y)
-    #import code
+    print('OPTIMIZATION DATATYPE:',type(x))
+    estim.fit(x,y)
+    #IMPORT CODE
     #code.interact(local=dict(globals(), **locals()))
     # there is only 1 model in the end -> 0, we dont care about its weight -> 1 (this is the model)
     #print(f" asdasdasd{estim.get_models_with_weights()}")
