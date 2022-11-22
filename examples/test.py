@@ -34,7 +34,7 @@ optidoc22='''
 --loader str  # optional path to a python file that introduces a load function
 
 --randinit int 1337
---folds int 5
+--folds int 0
 --foldselect int 0
 
 --subsample int -1

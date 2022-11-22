@@ -56,8 +56,8 @@ def optimize(X,Y,x,y, args):
             initial_configurations_via_metalearning=0 # autosklearn thros warnings otherwise
             )
 
-    print('OPTIMIZATION DATATYPE:',type(x))
-    estim.fit(x,y)
+    print('OPTIMIZATION DATATYPE:',type(X))
+    estim.fit(X,Y)
     #IMPORT CODE
     #code.interact(local=dict(globals(), **locals()))
     # there is only 1 model in the end -> 0, we dont care about its weight -> 1 (this is the model)
