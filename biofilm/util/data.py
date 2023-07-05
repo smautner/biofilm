@@ -1,7 +1,7 @@
 import dirtyopts
 import numpy as np
 from sklearn.utils import resample
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, StratifiedGroupKFold
 from sklearn.preprocessing import StandardScaler
 from lmz import iterselect, Range
 import scipy.sparse as sparse
@@ -21,6 +21,8 @@ datadoc='''
 
 --featurefile str
 --featurecount int -1
+
+--instancegroups str   # a jsonfile containing a dictionary instance_name -> group name 
 '''
 
 
@@ -30,9 +32,14 @@ def getargs():
 def getfold():
     args= dirtyopts.parse(datadoc).__dict__
     return loadfolds(**args)
+def getgroups(groups, instance_names):
+    groupdict = tools.jloadfile(groups)
+    grouplist = [groupdict[i] for i in instance_names]
+    groupintlist = tools.labelsToIntList(grouplist)[0]
+    return groupintlist
 
-
-def loadfolds(infile=None,loader=None,randinit=None, folds=None,foldselect=None, subsample=None, Z=None, featurefile=None, featurecount=None):
+def loadfolds(infile=None,loader=None,randinit=None, folds=None,
+              foldselect=None, subsample=None, Z=None, featurefile=None, featurecount=None, instancegroups = ''):
     if not loader:
         # assume data as saved via ubergauss.tools.ndumpfile
         raw = tools.nloadfile(infile)
@@ -83,14 +90,20 @@ def loadfolds(infile=None,loader=None,randinit=None, folds=None,foldselect=None,
     if folds > 1:
         return iterselect(
                 kfold(X,y,n_splits = folds,randseed=randinit,
-                    feature_names = features, instance_names = instances),
+                    feature_names = features, instance_names = instances, groups=instancegroups),
                 foldselect)
     else:
         return (X,y,np.array([]),np.array([])),features,instances
 
-def kfold(X, y, n_splits=5, randseed=None, shuffle=True, feature_names=None, instance_names=None):
-    kf = StratifiedKFold(n_splits=n_splits, shuffle=shuffle, random_state=randseed)
-    for train,test in  kf.split(X, y):
+def kfold(X, y, n_splits=5, randseed=None, shuffle=True, feature_names=None, instance_names=None, groups = ''):
+
+    if not groups:
+        kf = StratifiedKFold(n_splits=n_splits, shuffle=shuffle, random_state=randseed).split(X,y)
+    else:
+        groupintlist = getgroups(groups, instance_names)
+        kf = StratifiedGroupKFold(n_splits=n_splits, shuffle=shuffle, random_state=randseed).split(X, y, groupintlist )
+
+    for train,test in  kf:
         yield (X[train], y[train], X[test], y[test]),  feature_names, instance_names[test]
 
 

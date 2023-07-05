@@ -7,6 +7,7 @@ from biofilm import util
 from autosklearn.experimental.askl2 import AutoSklearn2Classifier as ASK2
 from autosklearn.classification import AutoSklearnClassifier as ASK1
 import autosklearn.metrics
+from sklearn.model_selection import GroupShuffleSplit
 
 optidoc='''
 --methods str+ any  'extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp'
@@ -18,6 +19,7 @@ optidoc='''
 --preprocess bool False
 --tmp_folder str
 #--metric str f1 assert f1 auc   TODO
+--instancegroups str   # a jsonfile containing a dictionary instance_name -> group name 
 '''
 
 '''
@@ -27,7 +29,7 @@ cls._classifiers.keys()
 'adaboost', 'bernoulli_nb', 'decision_tree', 'extra_trees', 'gaussian_nb', 'gradient_boosting', 'k_nearest_neighbors', 'lda', 'liblinear_svc', 'libsvm_svc', 'mlp', 'multinomial_nb', 'passive_aggressive', 'qda', 'random_forest', 'sgd'
 '''
 
-def optimize(X,Y,x,y, args):
+def optimize(X,Y,x,y,fea,ins,args):
 
     if args.methods[0] == 'any':
         estis =  None #['extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp']
@@ -44,10 +46,19 @@ def optimize(X,Y,x,y, args):
             include['feature_preprocessor'] =  ["no_preprocessing"]
             #include['data_preprocessor']     =  ['NoPreprocessing']
 
+    splitter , splitter_args = 'holdout', None
+    if args.instancegroups:
+        splitter = GroupShuffleSplit
+        grps = util.data.getgroups(args.instancegroups)
+        splitter_args = {'n_splits': 1, 'groups': grps, 'test_size':.3 }
+
     estim = ASK1(
             n_jobs = args.n_jobs,
             ensemble_size = 1,
             include = include,
+            dataset_compression = bool(args.instancegroups), # disable if instancegroups
+            resampling_strategy = splitter,
+            resampling_strategy_arguments = splitter_args,
             memory_limit = args.memoryMBthread,
             time_left_for_this_task = args.time,
             metric = autosklearn.metrics.f1,
@@ -75,7 +86,7 @@ def optimize(X,Y,x,y, args):
 def main():
     args = dirtyopts.parse(optidoc)
     data, fea, ins = util.getfold()
-    model = optimize(*data,args)
+    model = optimize(*data,fea, ins,args)
     scorehistory =  np.nan_to_num(\
             model.performance_over_time_['single_best_optimization_score'].to_numpy(),nan=0.0)
     util.report(model, args.out, additionaloutput=\
