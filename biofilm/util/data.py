@@ -1,7 +1,7 @@
 import dirtyopts
 import numpy as np
 from sklearn.utils import resample
-from sklearn.model_selection import StratifiedKFold, StratifiedGroupKFold
+from sklearn.model_selection import StratifiedKFold, GroupKFold
 from sklearn.preprocessing import StandardScaler
 from lmz import iterselect, Range
 import scipy.sparse as sparse
@@ -22,7 +22,7 @@ datadoc='''
 --featurefile str
 --featurecount int -1
 
---instancegroups str   # a jsonfile containing a dictionary instance_name -> group name 
+--instancegroups str   # a jsonfile containing a dictionary instance_name -> group name
 '''
 
 
@@ -101,7 +101,7 @@ def kfold(X, y, n_splits=5, randseed=None, shuffle=True, feature_names=None, ins
         kf = StratifiedKFold(n_splits=n_splits, shuffle=shuffle, random_state=randseed).split(X,y)
     else:
         groupintlist = getgroups(groups, instance_names)
-        kf = StratifiedGroupKFold(n_splits=n_splits, shuffle=shuffle, random_state=randseed).split(X, y, groupintlist )
+        kf = GroupKFold(n_splits=n_splits, shuffle=shuffle, random_state=randseed).split(X, y, groupintlist )
 
     for train,test in  kf:
         yield (X[train], y[train], X[test], y[test]),  feature_names, instance_names[test]

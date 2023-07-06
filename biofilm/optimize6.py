@@ -19,7 +19,7 @@ optidoc='''
 --preprocess bool False
 --tmp_folder str
 #--metric str f1 assert f1 auc   TODO
---instancegroups str   # a jsonfile containing a dictionary instance_name -> group name 
+--instancegroups str   # a jsonfile containing a dictionary instance_name -> group name
 '''
 
 '''
@@ -49,7 +49,7 @@ def optimize(X,Y,x,y,fea,ins,args):
     splitter , splitter_args = 'holdout', None
     if args.instancegroups:
         splitter = GroupShuffleSplit
-        grps = util.data.getgroups(args.instancegroups)
+        grps = util.data.getgroups(args.instancegroups, ins)
         splitter_args = {'n_splits': 1, 'groups': grps, 'test_size':.3 }
 
     estim = ASK1(
