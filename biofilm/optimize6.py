@@ -18,6 +18,7 @@ optidoc='''
 --randinit int 1337  # should be the same as the one in data.py
 --preprocess bool False
 --tmp_folder str
+--refit bool True
 #--metric str f1 assert f1 auc   TODO
 --instancegroups str   # a jsonfile containing a dictionary instance_name -> group name
 '''
@@ -89,9 +90,14 @@ def main():
     model = optimize(*data,fea, ins,args)
     scorehistory =  np.nan_to_num(\
             model.performance_over_time_['single_best_optimization_score'].to_numpy(),nan=0.0)
+
+    if args.refit:
+        model.refit(data[0], data[1])
+
     util.report(model, args.out, additionaloutput=\
             {'scorehistory': scorehistory , 'performancelog': model.performance_over_time_})
     so.lprint(scorehistory)
+
     if data[0].shape[1] < 100:
         print("SELECTED FEATURES: ", end='')
         pipeline = model.get_models_with_weights()[0][1]
