@@ -48,10 +48,15 @@ def optimize(X,Y,x,y,fea,ins,args):
             #include['data_preprocessor']     =  ['NoPreprocessing']
 
     splitter , splitter_args = 'holdout', None
+
     if args.instancegroups:
-        splitter = GroupShuffleSplit
+        splitter = util.data.groupedCV(n_splits = 1)
+        # print(f"{isinstance(splitter, util.data.BaseCrossValidator)=}")
+        breakpoint()
         grps = util.data.getgroups(args.instancegroups, ins)
-        splitter_args = {'n_splits': 1, 'groups': grps, 'test_size':.3 }
+        splitter.get_n_splits(X,Y,grps)
+        next(splitter.split(X,Y,grps))
+        splitter_args = {'n_splits': 1, 'groups': grps }
 
     estim = ASK1(
             n_jobs = args.n_jobs,

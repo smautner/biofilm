@@ -32,11 +32,55 @@ def getargs():
 def getfold():
     args= dirtyopts.parse(datadoc).__dict__
     return loadfolds(**args)
+
 def getgroups(groups, instance_names):
     groupdict = tools.jloadfile(groups)
-    grouplist = [groupdict[i] for i in instance_names]
+    grouplist = [groupdict[str(i)] for i in instance_names]
     groupintlist = tools.labelsToIntList(grouplist)[0]
     return groupintlist
+
+
+from sklearn.model_selection import  BaseCrossValidator
+
+
+class groupedCV(BaseCrossValidator):
+    def __init__(self, n_splits):
+        self.n_splits = n_splits
+    def get_n_splits(self, X= None, y= None, groups = None):
+        return self.n_splits
+
+    def arin(self,groupindex, testgrps):
+        return np.array([a in testgrps for a in groupindex])
+
+    def arin_index(self,groupindex, testgrps):
+        return np.array([i for i,a in enumerate(groupindex) if a in testgrps])
+
+    def _iter_test_indices(self, X,y,groups):
+        groups = np.array(groups)
+        z = np.unique(groups)
+        np.random.shuffle(z)
+        if self.n_splits > 1:
+            for testgroups in np.split(z, self.n_splits):
+                res =  self.arin_index(groups, testgroups)
+                print(f"{ res=}")
+                yield res
+        else:
+            test = np.split(z, self.n_splits)
+            yield self.arin_index(groups, test)
+
+    # def _iter_test_mask(self, X,y,groups):
+    #     groups = np.array(groups)
+    #     z = np.unique(groups)
+    #     np.random.shuffle(z)
+    #     if self.n_splits > 1:
+    #         for testgroups in np.split(z, self.n_splits):
+    #             res =  groups in testgroups
+    #             print(f"{ res=}")
+    #             yield res
+    #     else:
+    #         test = np.split(z, self.n_splits)
+    #         yield groups in test
+
 
 def loadfolds(infile=None,loader=None,randinit=None, folds=None,
               foldselect=None, subsample=None, Z=None, featurefile=None, featurecount=None, instancegroups = ''):
@@ -101,7 +145,8 @@ def kfold(X, y, n_splits=5, randseed=None, shuffle=True, feature_names=None, ins
         kf = StratifiedKFold(n_splits=n_splits, shuffle=shuffle, random_state=randseed).split(X,y)
     else:
         groupintlist = getgroups(groups, instance_names)
-        kf = GroupKFold(n_splits=n_splits, shuffle=shuffle, random_state=randseed).split(X, y, groupintlist )
+        # kf = groupedCV(n_splits=n_splits, shuffle=shuffle, random_state=randseed).split(X, y, groupintlist )
+        kf = groupedCV(n_splits=n_splits).split(X, y, groupintlist )
 
     for train,test in  kf:
         yield (X[train], y[train], X[test], y[test]),  feature_names, instance_names[test]
