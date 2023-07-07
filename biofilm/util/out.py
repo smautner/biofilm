@@ -66,7 +66,7 @@ def report(model, outputname, quiet=False, predict_train=False,additionaloutput=
     with open(outputname+".csv", "w") as f:
         things = zip(ins,y,pred,proba)
         things = [ f"{a}, {b}, {c}, {d}, {dataargs.randinit}"  for a,b,c,d in things  ]
-        things = ['instance_id, true_label, predicted_label, instance_score, rand_init'] + things
+        things = ['instance_id,true_label,predicted_label,instance_score,rand_init'] + things
         f.write('\n'.join( things ) )
         f.write('\n')
         print("\n########## CSV WRITTEN ##########\n")
