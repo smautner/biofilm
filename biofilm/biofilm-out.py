@@ -82,9 +82,20 @@ if args.drawAll:
         precision, recall, thresholds = precision_recall_curve( truth, s)
         plt.plot(recall, precision)
 
+
+f_scores = np.linspace(0.2, 0.8, num=4)
+lines, labels = [], []
+for f_score in f_scores:
+    x = np.linspace(0.01, 1)
+    y = f_score * x / (2 * x - f_score)
+    (l,) = plt.plot(x[y >= 0], y[y >= 0], color="gray", alpha=.2)
+    plt.annotate("f1={0:0.1f}".format(f_score), xy=(0.9, y[45] + 0.02))
+
+
+plt.ylim((0,1))
 plt.legend()
 plt.show()
-
+plt.savefig("test.png")
 
 
 '''
