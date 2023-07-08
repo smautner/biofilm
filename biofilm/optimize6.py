@@ -30,7 +30,7 @@ cls._classifiers.keys()
 'adaboost', 'bernoulli_nb', 'decision_tree', 'extra_trees', 'gaussian_nb', 'gradient_boosting', 'k_nearest_neighbors', 'lda', 'liblinear_svc', 'libsvm_svc', 'mlp', 'multinomial_nb', 'passive_aggressive', 'qda', 'random_forest', 'sgd'
 '''
 
-def optimize(X,Y,x,y,fea,ins,args):
+def optimize(X,Y,x,y,fea,instance_names,args):
 
     if args.methods[0] == 'any':
         estis =  None #['extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp']
@@ -52,8 +52,7 @@ def optimize(X,Y,x,y,fea,ins,args):
     if args.instancegroups:
         splitter = util.data.groupedCV(n_splits = 1)
         # print(f"{isinstance(splitter, util.data.BaseCrossValidator)=}")
-        breakpoint()
-        grps = util.data.getgroups(args.instancegroups, ins)
+        grps = util.data.getgroups(args.instancegroups, instance_names[f'train'])
         splitter.get_n_splits(X,Y,grps)
         next(splitter.split(X,Y,grps))
         splitter_args = {'n_splits': 1, 'groups': grps }

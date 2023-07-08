@@ -42,6 +42,11 @@ def getgroups(groups, instance_names):
 
 from sklearn.model_selection import  BaseCrossValidator
 
+def contains(iter, element):
+    for e in iter:
+        if e == element:
+            return True
+    return False
 
 class groupedCV(BaseCrossValidator):
     def __init__(self, n_splits):
@@ -49,23 +54,22 @@ class groupedCV(BaseCrossValidator):
     def get_n_splits(self, X= None, y= None, groups = None):
         return self.n_splits
 
-    def arin(self,groupindex, testgrps):
-        return np.array([a in testgrps for a in groupindex])
+    # def arin(self,groupindex, testgrps):
+    #     return np.array([ contains(testgrps, a) for a in groupindex])
 
     def arin_index(self,groupindex, testgrps):
-        return np.array([i for i,a in enumerate(groupindex) if a in testgrps])
+        return np.array([i for i,a in enumerate(groupindex) if contains(testgrps,a)])
 
     def _iter_test_indices(self, X,y,groups):
         groups = np.array(groups)
         z = np.unique(groups)
         np.random.shuffle(z)
         if self.n_splits > 1:
-            for testgroups in np.split(z, self.n_splits):
+            for testgroups in np.array_split(z, self.n_splits):
                 res =  self.arin_index(groups, testgroups)
-                print(f"{ res=}")
                 yield res
         else:
-            test = np.split(z, self.n_splits)
+            test = np.array_split(z, 3)[0]
             yield self.arin_index(groups, test)
 
     # def _iter_test_mask(self, X,y,groups):
@@ -149,6 +153,7 @@ def kfold(X, y, n_splits=5, randseed=None, shuffle=True, feature_names=None, ins
         kf = groupedCV(n_splits=n_splits).split(X, y, groupintlist )
 
     for train,test in  kf:
-        yield (X[train], y[train], X[test], y[test]),  feature_names, instance_names[test]
+        yield (X[train], y[train], X[test], y[test]),  feature_names, {f'train':instance_names[train],
+                                                                       f'test':instance_names[test]}
 
 

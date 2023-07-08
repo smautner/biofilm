@@ -110,7 +110,7 @@ if args.showproblems > 0:
 
     scoresT = np.array(scores).T
     print('SCORESHAPE',scoresT.shape)
-    instances = np.array(insta)
+    instances = np.array(insta[f'test'])
     pmask = truth ==1
     nmask = truth ==0
 

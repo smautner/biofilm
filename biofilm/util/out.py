@@ -50,9 +50,11 @@ def report(model, outputname, quiet=False, predict_train=False,additionaloutput=
 
     if predict_train or data[2].shape[0] ==0:
         print("INFO: there is no test set provided so we eval on train. this may be unintendet.")
+        ins = ins[f'train']
         X = data[0]
         y = data[1]
     else:
+        ins = ins[f'test']
         X = data[2]
         y= data[3]
 
