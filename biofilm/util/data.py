@@ -141,7 +141,9 @@ def loadfolds(infile=None,loader=None,randinit=None, folds=None,
                     feature_names = features, instance_names = instances, groups=instancegroups),
                 foldselect)
     else:
-        return (X,y,np.array([]),np.array([])),features,instances
+        return (X,y,np.array([]),np.array([])),features, {f'train':instances,
+                                                          f'test':[]}
+
 
 def kfold(X, y, n_splits=5, randseed=None, shuffle=True, feature_names=None, instance_names=None, groups = ''):
 
