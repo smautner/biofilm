@@ -20,7 +20,7 @@ optidoc='''
 --tmp_folder str
 --refit bool True
 --instancegroups str   # a jsonfile containing a dictionary instance_name -> group name
---autosk_logging bool False   # autosklearn logging 
+--autosk_debug bool False   # autosklearn logging
 '''
 
 '''
@@ -48,7 +48,6 @@ def optimize(X,Y,x,y,fea,instance_names,args):
             #include['data_preprocessor']     =  ['NoPreprocessing']
 
     splitter , splitter_args = 'holdout', None
-
     if args.instancegroups:
         splitter = util.data.groupedCV(n_splits = 1)
         # print(f"{isinstance(splitter, util.data.BaseCrossValidator)=}")
@@ -69,7 +68,7 @@ def optimize(X,Y,x,y,fea,instance_names,args):
             metric = autosklearn.metrics.f1,
             max_models_on_disc = 1,
             tmp_folder = args.tmp_folder or None,
-            logging_config = util.logging_config if args.autosk_logging else None,
+            logging_config = util.logging_config if args.autosk_debug else None,
             initial_configurations_via_metalearning=0 # autosklearn thros warnings otherwise
             )
 
