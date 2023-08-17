@@ -19,8 +19,8 @@ optidoc='''
 --preprocess bool False
 --tmp_folder str
 --refit bool True
-#--metric str f1 assert f1 auc   TODO
 --instancegroups str   # a jsonfile containing a dictionary instance_name -> group name
+--autosk_logging bool False   # autosklearn logging 
 '''
 
 '''
@@ -61,7 +61,7 @@ def optimize(X,Y,x,y,fea,instance_names,args):
             n_jobs = args.n_jobs,
             ensemble_size = 1,
             include = include,
-            dataset_compression = bool(args.instancegroups), # disable if instancegroups
+            dataset_compression = not bool(args.instancegroups), # disable if instancegroups
             resampling_strategy = splitter,
             resampling_strategy_arguments = splitter_args,
             memory_limit = args.memoryMBthread,
@@ -69,11 +69,13 @@ def optimize(X,Y,x,y,fea,instance_names,args):
             metric = autosklearn.metrics.f1,
             max_models_on_disc = 1,
             tmp_folder = args.tmp_folder or None,
+            logging_config = util.logging_config if args.autosk_logging else None,
             initial_configurations_via_metalearning=0 # autosklearn thros warnings otherwise
             )
 
     print('OPTIMIZATION DATATYPE:',type(X))
     estim.fit(X,Y)
+    print('OPTIMIZATION DONE')
     #IMPORT CODE
     #code.interact(local=dict(globals(), **locals()))
     # there is only 1 model in the end -> 0, we dont care about its weight -> 1 (this is the model)
