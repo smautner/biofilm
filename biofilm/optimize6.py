@@ -9,6 +9,7 @@ from autosklearn.classification import AutoSklearnClassifier as ASK1
 import autosklearn.metrics
 from sklearn.model_selection import GroupShuffleSplit
 
+
 optidoc='''
 --methods str+ any  'extra_trees', 'passive_aggressive', 'random_forest', 'sgd', 'gradient_boosting', 'mlp'
 --out str jsongoeshere
@@ -21,6 +22,8 @@ optidoc='''
 --refit bool True
 --instancegroups str   # a jsonfile containing a dictionary instance_name -> group name
 --autosk_debug bool False   # autosklearn logging
+--autosk_logfile str autosklearn.log
+--ensemble int 1  # ensemble size, autosklearn will combine the best models
 '''
 
 '''
@@ -56,10 +59,15 @@ def optimize(X,Y,x,y,fea,instance_names,args):
         next(splitter.split(X,Y,grps))
         splitter_args = {'n_splits': 1, 'groups': grps }
 
+
+    logging_config = util.logging_config
+    logging_config['handlers']['file_handler']['filename'] = args.autosk_logfile
+    assert not args.autosk_debug or '/' in args.autosk_logfile, 'ask doesnt like loogfile uris without slash'
+
     estim = ASK1(
             n_jobs = args.n_jobs,
-            ensemble_size = 1,
-            max_models_on_disc = 1,
+            ensemble_size = max( args.ensemble, 1),
+            max_models_on_disc = max( args.ensemble, 1),
             initial_configurations_via_metalearning=0, # autosklearn thros warnings otherwise
             include = include,
             dataset_compression = not bool(args.instancegroups), # disable if instancegroups
@@ -69,7 +77,7 @@ def optimize(X,Y,x,y,fea,instance_names,args):
             time_left_for_this_task = args.time,
             metric = autosklearn.metrics.f1,
             tmp_folder = args.tmp_folder or None,
-            logging_config = util.logging_config if args.autosk_debug else None,
+            logging_config = logging_config if args.autosk_debug else None,
             )
 
     print('OPTIMIZATION DATATYPE:',type(X))

@@ -17,14 +17,26 @@ logging_config = {
             "class": "logging.StreamHandler",
             "stream": "ext://sys.stdout",
         },
+
+     "file_handler": {
+            "level": "DEBUG",
+            "formatter": "custom",
+            "class": "logging.FileHandler",
+            "filename": "autosklearn.log",
+        },
+
     },
+
     "loggers": {
         "": {  # root logger
             "level": "DEBUG",
+            "handlers": ["console", 'file_handler'],
         },
-        "Client-EnsembleBuilder": {
-            "level": "DEBUG",
-            "handlers": ["console"],
-        },
+
+        # "Client-EnsembleBuilder": {
+        #     "level": "DEBUG",
+        #     "handlers": ["console", 'file_handler'],
+        # },
+
     },
 }
