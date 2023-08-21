@@ -23,6 +23,7 @@ optidoc='''
 --instancegroups str   # a jsonfile containing a dictionary instance_name -> group name
 --autosk_debug bool False   # autosklearn logging
 --autosk_logfile str autosklearn.log
+--autosk_loghandlers str+ console file_handler  # where do the logs go?
 --ensemble int 1  # ensemble size, autosklearn will combine the best models
 '''
 
@@ -62,6 +63,8 @@ def optimize(X,Y,x,y,fea,instance_names,args):
 
     logging_config = util.logging_config
     logging_config['handlers']['file_handler']['filename'] = args.autosk_logfile
+    logging_config['loggers']['']['handlers'] = args.autosk_loghandlers
+    print(logging_config)
     assert not args.autosk_debug or '/' in args.autosk_logfile, 'ask doesnt like loogfile uris without slash'
 
     estim = ASK1(
