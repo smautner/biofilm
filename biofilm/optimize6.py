@@ -59,6 +59,8 @@ def optimize(X,Y,x,y,fea,instance_names,args):
     estim = ASK1(
             n_jobs = args.n_jobs,
             ensemble_size = 1,
+            max_models_on_disc = 1,
+            initial_configurations_via_metalearning=0, # autosklearn thros warnings otherwise
             include = include,
             dataset_compression = not bool(args.instancegroups), # disable if instancegroups
             resampling_strategy = splitter,
@@ -66,10 +68,8 @@ def optimize(X,Y,x,y,fea,instance_names,args):
             memory_limit = args.memoryMBthread,
             time_left_for_this_task = args.time,
             metric = autosklearn.metrics.f1,
-            max_models_on_disc = 1,
             tmp_folder = args.tmp_folder or None,
             logging_config = util.logging_config if args.autosk_debug else None,
-            initial_configurations_via_metalearning=0 # autosklearn thros warnings otherwise
             )
 
     print('OPTIMIZATION DATATYPE:',type(X))
@@ -97,7 +97,9 @@ def main():
             model.performance_over_time_['single_best_optimization_score'].to_numpy(),nan=0.0)
 
     if args.refit:
+        print("REFITTING:..", end= '')
         model.refit(data[0], data[1])
+        print("DONE")
 
     util.report(model, args.out, additionaloutput=\
             {'scorehistory': scorehistory , 'performancelog': model.performance_over_time_})
