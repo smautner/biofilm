@@ -12,7 +12,7 @@ from biofilm.algo import feature_selection
 import pandas as pd
 from biofilm.util import draw
 import networkx as nx
-
+from ubergauss import tools
 
 __doc__ = '''
 # cluster features  / select highly correlating ones from each cluster...
@@ -37,7 +37,7 @@ def ft(x,y, feat):
 
     corr  = spearman(x,y)
     # delete empty lines:
-    xt = np.transpose(util.zehidense(x))
+    xt = np.transpose(tools.zehidense(x))
     xt = xt[~biofilm.algo.feature_selection.all(xt == 0, axis=1).A1]
     xt = np.abs(np.corrcoef(xt))
 
@@ -116,7 +116,7 @@ def select(X,scores,num):
 
 def spearman(x,y):
     spear = lambda ft: np.abs(spearmanr(ft.T,y)[0])
-    x = util.zehidense(x)
+    x = tools.zehidense(x)
     re = Map(spear,x.T)
     return np.array(re)
 

@@ -67,7 +67,6 @@ avg_score = [np.mean(x) for x in zip(*scores)]
 
 
 
-
 from sklearn.metrics import precision_recall_curve
 precision, recall, thresholds = precision_recall_curve( truth, avg_score)
 import structout as so

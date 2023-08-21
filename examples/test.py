@@ -49,10 +49,4 @@ args = dirtyopts.parse( optidoc) # should just give us the defaults
 model=o6.optimize(*data, args)
 
 
-# scorehistory =  np.nan_to_num(\
-#         model.performance_over_time_['single_best_optimization_score'].to_numpy(),nan=0.0)
-# util.report(model, args.out, additionaloutput=\
-#     {'scorehistory': scorehistory , 'performancelog': model.performance_over_time_})
-
-
 

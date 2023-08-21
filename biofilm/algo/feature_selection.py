@@ -228,7 +228,7 @@ def agglocore(X,Y,x,y,args):
     # fit agglo
     numft = X.shape[1]
     clf = AgglomerativeClustering(n_clusters = min(100,numft) ,compute_distances=True)
-    X_data = np.transpose(util.zehidense(X))
+    X_data = np.transpose(tools.zehidense(X))
     clf.fit(X_data)
 
     dists = np.array([a for a,(b,c) in zip(clf.distances_, clf.children_) if b < c < numft])

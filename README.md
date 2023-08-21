@@ -3,10 +3,7 @@
 # install
 
 ```
-get conda forge in the channel list
-get compiler stuff for auto-sklearn installed
-
-conda install -c smautner biofilm
+conda install -c conda-forge biofilm
 ```
 
 # Feature selection is already nice:
@@ -29,12 +26,11 @@ go to biofilm and run python biofilm-features.py -h
 ```
 
 
-# lets make an overview of how things talk to each other:
 
 ## data loading
 
 a) tools.ndumpfile([X,y, featurenames, instancenames],fname) where feature and instancenames are optional or
-b) provide --loader whose read function will be called
+b) provide --loader whose read function will be called (examples/npzloader)
 
 defaultformat: X,y in a npz dump, features and instances get enumerated
 a custom dataloader: X,y, features, instances

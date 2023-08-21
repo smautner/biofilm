@@ -2,7 +2,10 @@
 from sklearn.metrics import f1_score
 import biofilm.util.data as datautil
 import pprint
-from biofilm import util
+import dirtyopts
+from ubergauss import tools
+
+
 
 import re
 optidoc='''
@@ -10,7 +13,8 @@ optidoc='''
 --model str inputmodel
 --predict_train bool False
 '''
-import dirtyopts
+
+
 
 def get_params(ask):
     '''
@@ -89,7 +93,7 @@ def report(model, outputname, quiet=False, predict_train=False,additionaloutput=
     d['estimator'] = model
 
     d.update(additionaloutput)
-    util.dumpfile(d, outputname+'.model')
+    tools.dumpfile(d, outputname+'.model')
     print("\n########## MODEL WRITTEN ##########\n")
 
 
