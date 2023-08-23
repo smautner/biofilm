@@ -23,7 +23,7 @@ optidoc='''
 --instancegroups str   # a jsonfile containing a dictionary instance_name -> group name
 --autosk_debug bool False   # autosklearn logging
 --autosk_debugfile str autosklearn.log
---autosk_debughandlers str+ console  # file_handler  is another option
+--autosk_debugout str+ console  # file_handler  is another option
 --ensemble int 1  # ensemble size, autosklearn will combine the best models
 '''
 
@@ -62,10 +62,10 @@ def optimize(X,Y,x,y,fea,instance_names,args):
 
 
     logging_config = util.logging_config
-    logging_config['handlers']['file_handler']['filename'] = args.autosk_logfile
-    logging_config['loggers']['']['handlers'] = args.autosk_loghandlers
+    logging_config['handlers']['file_handler']['filename'] = args.autosk_debugfile
+    logging_config['loggers']['']['handlers'] = args.autosk_debugout
     print(logging_config)
-    assert not args.autosk_debug or '/' in args.autosk_logfile, 'ask doesnt like loogfile uris without slash'
+    assert not args.autosk_debug or '/' in args.autosk_debugfile, 'ask doesnt like loogfile uris without slash'
 
     estim = ASK1(
             n_jobs = args.n_jobs,
