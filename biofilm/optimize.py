@@ -23,7 +23,7 @@ optidoc='''
 --instancegroups str   # a jsonfile containing a dictionary instance_name -> group name
 --autosk_debug bool False   # autosklearn logging
 --autosk_debugfile str autosklearn.log
---autosk_debugout str+ console  # file_handler  is another option
+--autosk_debugout str+ file_handler  # console   is another option, chooses where to output debug
 --ensemble int 1  # ensemble size, autosklearn will combine the best models
 '''
 
