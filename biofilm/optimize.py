@@ -22,8 +22,8 @@ optidoc='''
 --refit bool True
 --instancegroups str   # a jsonfile containing a dictionary instance_name -> group name
 --autosk_debug bool False   # autosklearn logging
---autosk_logfile str autosklearn.log
---autosk_loghandlers str+ console file_handler  # where do the logs go?
+--autosk_debugfile str autosklearn.log
+--autosk_debughandlers str+ console  # file_handler  is another option
 --ensemble int 1  # ensemble size, autosklearn will combine the best models
 '''
 
