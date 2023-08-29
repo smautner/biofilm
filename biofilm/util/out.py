@@ -104,7 +104,7 @@ def report(model, outputname, quiet=False, predict_train=False,additionaloutput=
 
 if __name__ == "__main__":
     args = dirtyopts.parse(optidoc)
-    mod = util.loadfile(args.model)
+    mod = tools.loadfile(args.model)
     if type(mod)==dict:
         report(mod['estimator'], args.out,predict_train = args.predict_train )
     else: # TODO  we should never arrive here, but we do, this should be solved at some opint
