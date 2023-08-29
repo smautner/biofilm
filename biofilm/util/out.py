@@ -30,9 +30,13 @@ def get_params2(ask):
     this should actually find the sklearn classifier and get the paramns
     '''
     #ask = ask.get_models_with_weights()[0][1]
+    if 'steps' not in ask.__dict__:
+        print('AUTOSKLEARN DID NOT FIND A MODEL')
+        exit()
     args=str(ask.steps[-1][1].choice.__dict__)
     try:
-        args+='\n\n\n\n '+ str(ask.steps[-2][1].choice.__dict__) # not sure if a choice is required
+        # not sure if a choice is required
+        args+='\n\n\n\n '+ str(ask.steps[-2][1].choice.__dict__)
     except:
         args+='\n failed to get preprocessing info'
     return args
