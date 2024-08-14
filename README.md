@@ -3,6 +3,7 @@
 # install
 
 ```
+pip install biofilm
 conda install -c conda-forge biofilm
 ```
 

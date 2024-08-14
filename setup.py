@@ -105,8 +105,9 @@ setup(
     url='https://github.com/smautner/biofilm',
     license='GPLv3',
 
-    description='another opts parser',
-    #long_description=open('README.md').read(),
+    description='make it easy to generate a FILtering Models for BIOlogical data',
+    long_description=open('README.md').read(),
+    long_description_content_type = 'text/markdown',
     install_requires=[
         'scikit-learn >= 0.24.2',
         'ubergauss==0.0.43',
